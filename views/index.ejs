@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+
+<head>
+  <meta charset="utf-8">
+  <title>LeanEngine websocket demo</title>
+  <link href="http://terminal.jcubic.pl/css/jquery.terminal.css" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    #term {
+      position: absolute;
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="term">
+
+  </div>
+
+  <script src="http://code.jquery.com/jquery-1.7.2.min.js"></script>
+  <script src="http://terminal.jcubic.pl/js/jquery.terminal-0.8.8.min.js"></script>
+  <script>
+    jQuery(function ($, undefined) {
+      var url = 'ws://' + window.location.host + '/open/echo';
+      var connection = null;
+      connection = new WebSocket(url);
+      connection.onopen = function () {
+        console.log('connected!');
+        var json={"objid":"<%=objid%>","door":"001"};
+        console.log(json);
+        connection.send(json);
+      };
+      connection.onerror = function (err) {
+        console.log('error: ' + err);
+      };
+      connection.onmessage = function (e) {
+        console.log('< ' + e.data);
+      };
+      connection.onclose = function (e) {
+        console.log('connection closed!');
+        connection = null;
+      }
+    });
+  </script>
+</body>
