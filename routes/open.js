@@ -59,11 +59,36 @@ router.get('/', function (req, res) {
     }
 });
 
+let flag = false;
 router.ws('/echo', function (ws, req) {
     ws.on('message', function (msg) {
-        console.log('%j',msg);
-        let user = AV.Object.createWithoutData('WxUser', msg.door);
-        //let query=new AV.Query('D')
+        console.log( msg);
+        let door = AV.Object.createWithoutData('Door', "5925a5c7a22b9d0058b13a01");
+        let user = AV.Object.createWithoutData('WxUser', "591323571b69e600686e6089");
+        let query = new AV.Query('UserDoorMap');
+        query.equalTo('door', door);
+        query.equalTo('user', user);
+        query.count().then(function (count) {
+            if (count == 1) {
+                
+                flag = true;
+            } else {
+                flag = false;
+            }
+        });
+    });
+});
+
+router.ws('/door', function (ws, req) {
+    let interval = setInterval(function () {
+        if (flag) {
+            flag=false;
+            ws.send(1);
+        }
+    }, 1000);
+    ws.on('message', function (msg) {
+        console.log(msg);
+
     });
 });
 
