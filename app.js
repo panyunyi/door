@@ -7,6 +7,9 @@ var bodyParser = require('body-parser');
 var AV = require('leanengine');
 var cookieSession = require('cookie-session');
 var expressWs = require('express-ws');
+var users = require('./routes/users');
+var admin=require('./routes/admin');
+var datatable=require('./routes/datatable');
 // 加载云函数定义，你可以将云函数拆分到多个文件方便管理，但需要在主文件中加载它们
 require('./cloud');
 
@@ -23,7 +26,7 @@ app.use(timeout('15s'));
 
 // 加载云引擎中间件
 app.use(AV.express());
-
+app.use(AV.Cloud.CookieSession({ secret: '05XgTktKPMkU', maxAge: 3600000, fetchUser: true }));
 app.enable('trust proxy');
 // 需要重定向到 HTTPS 可去除下一行的注释。
 // app.use(AV.Cloud.HttpsRedirect());
@@ -38,11 +41,18 @@ app.use(cookieSession({
   // Cookie Options
   maxAge: 24 * 60 * 60 * 1000 // 24 hours
 }));
-
+app.get('/', function(req, res) {
+  res.render('login',{title:'用户登录'});
+});
+app.get('/logout',function(req,res){
+    req.currentUser.logOut();
+    res.clearCurrentUser();
+    return res.redirect('login');
+});
 app.use('/open', require('./routes/open'));
-// 可以将一类的路由单独保存在一个文件中
-app.use('/todos', require('./routes/todos'));
-
+app.use('/login', users);
+app.use('/admin',admin);
+app.use('/api/json',datatable);
 app.use(function(req, res, next) {
   // 如果任何一个路由都没有返回响应，则抛出一个 404 异常给后续的异常处理器
   if (!res.headersSent) {

@@ -33,14 +33,14 @@ router.get('/', function (req, res) {
                                 wxuser.set('headimgurl', body2.headimgurl);
                                 wxuser.save().then(function (data) {
                                     sess.objidid = data.id;
-                                    res.render('index', { objid: data.id });
+                                    res.render('open', { objid: data.id });
                                 }, function (err) {
                                     console.log(err);
                                 });
                             } else if (count == 1) {
                                 query.first().then(function (data) {
                                     sess.objid = data.id;
-                                    res.render('index', { objid: data.id });
+                                    res.render('open', { objid: data.id });
                                 });
                             } else {
                                 res.send("用户信息有重复，请联系管理员。");
@@ -55,7 +55,7 @@ router.get('/', function (req, res) {
             }
         });
     } else {
-        res.render('index', { objid: sess.objid })
+        res.render('open', { objid: sess.objid })
     }
 });
 
@@ -70,7 +70,7 @@ router.ws('/echo', function (ws, req) {
         query.equalTo('user', user);
         query.count().then(function (count) {
             if (count == 1) {
-                
+
                 flag = true;
             } else {
                 flag = false;
