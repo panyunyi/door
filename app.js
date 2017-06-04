@@ -54,7 +54,7 @@ app.use(function(req, res, next) {
 
 // error handlers
 app.use(function(err, req, res, next) {
-  if (req.timedout && req.headers.upgrade === 'WebSocket') {
+  if (req.timedout && (req.headers.upgrade === 'WebSocket'||req.headers.upgrade==='websocket')) {
     // 忽略 websocket 的超时
     return;
   }
@@ -64,7 +64,7 @@ app.use(function(err, req, res, next) {
     console.error(err.stack || err);
   }
   if (req.timedout) {
-    console.log(req.headers.upgrade);
+    //console.log(req.headers.upgrade);
     console.error('请求超时: url=%s, timeout=%d, 请确认方法执行耗时很长，或没有正确的 response 回调。', req.originalUrl, err.timeout);
   }
   res.status(statusCode);
