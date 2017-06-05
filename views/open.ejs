@@ -24,28 +24,9 @@
 
   </div>
 
-  <script src="../jquery-1.7.2.min.js"></script>
-  <script>
-    jQuery(function ($, undefined) {
-      var url = 'ws://' + window.location.host + '/open/echo';
-      var connection = null;
-      connection = new WebSocket(url);
-      connection.onopen = function () {
-        console.log('connected!');
-        var json = { objid: "<%=objid%>", door: "001" };
-        console.log(json);
-        connection.send("001");
-      };
-      connection.onerror = function (err) {
-        console.log('error: ' + err);
-      };
-      connection.onmessage = function (e) {
-        console.log('< ' + e.data);
-      };
-      connection.onclose = function (e) {
-        console.log('connection closed!');
-        connection = null;
-      }
-    });
-  </script>
+  <script src="../socket.io.min.js"></script>
+    <script type="text/javascript">
+        var socket=io.connect('http://14961rg045.iask.in:12120');
+        socket.emit('clientBroadcast',{room:"eventRoom",event:1,data:1});
+    </script>
 </body>

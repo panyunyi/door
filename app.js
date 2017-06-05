@@ -49,6 +49,7 @@ app.get('/logout',function(req,res){
     res.clearCurrentUser();
     return res.redirect('login');
 });
+app.use('/wx',require('./routes/wx'));
 app.use('/open', require('./routes/open'));
 app.use('/login', users);
 app.use('/admin',admin);
