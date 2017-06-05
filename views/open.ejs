@@ -32,7 +32,7 @@
       connection = new WebSocket(url);
       connection.onopen = function () {
         console.log('connected!');
-        var json={objid:"<%=objid%>",door:"001"};
+        var json = { objid: "<%=objid%>", door: "001" };
         console.log(json);
         connection.send("001");
       };

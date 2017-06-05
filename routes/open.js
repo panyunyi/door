@@ -31,6 +31,7 @@ router.get('/', function (req, res) {
                                 wxuser.set('province', body2.province);
                                 wxuser.set('country', body2.country);
                                 wxuser.set('headimgurl', body2.headimgurl);
+                                wxuser.set('flag', -1);
                                 wxuser.save().then(function (data) {
                                     sess.objidid = data.id;
                                     res.render('open', { objid: data.id });
@@ -62,7 +63,7 @@ router.get('/', function (req, res) {
 let flag = false;
 router.ws('/echo', function (ws, req) {
     ws.on('message', function (msg) {
-        console.log( msg);
+        console.log(msg);
         let door = AV.Object.createWithoutData('Door', "5925a5c7a22b9d0058b13a01");
         let user = AV.Object.createWithoutData('WxUser', "591323571b69e600686e6089");
         let query = new AV.Query('UserDoorMap');
@@ -82,7 +83,7 @@ router.ws('/echo', function (ws, req) {
 router.ws('/door', function (ws, req) {
     let interval = setInterval(function () {
         if (flag) {
-            flag=false;
+            flag = false;
             ws.send(1);
         }
     }, 1000);
