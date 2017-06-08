@@ -6,7 +6,6 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var AV = require('leanengine');
 var cookieSession = require('cookie-session');
-var expressWs = require('express-ws');
 var users = require('./routes/users');
 var admin=require('./routes/admin');
 var datatable=require('./routes/datatable');
@@ -14,7 +13,6 @@ var datatable=require('./routes/datatable');
 require('./cloud');
 
 var app = express();
-expressWs(app);
 // 设置模板引擎
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');

@@ -2,7 +2,7 @@
 
 <head>
   <meta charset="utf-8">
-  <title>LeanEngine websocket demo</title>
+  <title>微信二维码门禁</title>
   <style>
     body {
       margin: 0;
@@ -20,13 +20,21 @@
 </head>
 
 <body>
-  <div id="term">
+  <h1>
 
-  </div>
+  </h1>
 
+  <script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+  <link rel="stylesheet" href="https://res.wx.qq.com/open/libs/weui/1.1.0/weui.min.css">
+  <script type="text/javascript" src="../weui.js"></script>
   <script src="../socket.io.min.js"></script>
-    <script type="text/javascript">
-        var socket=io.connect('http://14961rg045.iask.in:12120');
-        socket.emit('clientBroadcast',{room:"eventRoom",event:1,data:1});
-    </script>
+  <script type="text/javascript">
+    var socket = io.connect('http://14961rg045.iask.in:12120');
+    socket.emit('clientBroadcast', { room: "eventRoom", event: "<%=ip%>", data: 1 });
+    weui.toast('<%=title%>', {
+      duration: 3000,
+      className: 'custom-classname',
+      callback: function () {window.opener=null;window.close(); }
+    });
+  </script>
 </body>
