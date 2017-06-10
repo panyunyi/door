@@ -44,4 +44,12 @@ router.get('/visitor', function (req, res) {
     }
 });
 
+router.get('/history', function (req, res) {
+    if (req.currentUser) {
+        res.render('history');
+    } else {
+        res.redirect('../login');
+    }
+});
+
 module.exports = router;

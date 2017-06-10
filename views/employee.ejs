@@ -17,9 +17,9 @@
                         <!-- /.panel-heading -->
                         <div class="panel-body">
                             <ul class="nav nav-tabs">
-                                <li class="active"><a href="#home" data-toggle="tab">已审核用户</a>
+                                <li class="active"><a id="user1" href="#home" data-toggle="tab">已审核用户</a>
                                 </li>
-                                <li><a href="#profile" data-toggle="tab">用户申请审核</a>
+                                <li><a id="user2" href="#profile" data-toggle="tab">用户申请审核</a>
                                 </li>
                             </ul>
 
@@ -36,7 +36,6 @@
                                                 <th>门牌号</th>
                                                 <th>姓名</th>
                                                 <th>电话</th>
-                                                <th>微信昵称</th>
                                             </tr>
                                         </thead>
                                     </table>
@@ -48,12 +47,9 @@
                                             <tr>
                                                 <th>序号</th>
                                                 <th>公司名称</th>
-                                                <th>楼层</th>
                                                 <th>门牌号</th>
                                                 <th>姓名</th>
                                                 <th>电话</th>
-                                                <th>微信昵称</th>
-                                                <th>审核</th>
                                             </tr>
                                         </thead>
                                     </table>
@@ -67,6 +63,32 @@
                 </div>
             </div>
             <!-- /.row -->
+            <div id="row2" class="row">
+                <div class="col-lg-12">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            门禁权限设置
+                        </div>
+                        <!-- /.panel-heading -->
+                        <div class="panel-body">
+                            <table id="table2" class="ui celled table" cellspacing="0" width="100%">
+                                <thead>
+                                    <tr>
+                                        <th>序号</th>
+                                        <th>门禁名称</th>
+                                        <th>门禁编号</th>
+                                        <th>ip</th>
+                                    </tr>
+                                </thead>
+                            </table>
+                            <!-- /.table-responsive -->
+
+                        </div>
+                        <!-- /.panel-body -->
+                    </div>
+                    <!-- /.panel -->
+                </div>
+            </div>
         </div>
         <!-- /.container-fluid -->
     </div>
@@ -99,12 +121,16 @@
     <script>
         var editor;
         $(document).ready(function () {
+            $('#user1').on('click', function () {
+                $('#row2').css('display', 'block');
+                table.ajax.reload();
+            });
+            $('#user2').on('click', function () {
+                $('#row2').css('display', 'none');
+                table1.ajax.reload();
+            });
             editor = new $.fn.dataTable.Editor({
                 ajax: {
-                    create: {
-                        type: 'POST',
-                        url: '../api/json/employee/add'
-                    },
                     edit: {
                         type: 'PUT',
                         url: '../api/json/employee/edit/_id_'
@@ -116,18 +142,11 @@
                 },
                 table: "#table",
                 fields: [
-                    { label: '公司名称', name: 'company' },
-                    { label: '楼层', name: 'floor' },
-                    { label: '门牌号', name: 'number' },
+                    { label: '公司名称', name: 'company', type: 'select' },
                     { label: '姓名', name: 'name' },
-                    { label: '电话', name: 'phone' },
-                    { label: '微信昵称', name: 'nickname' }
+                    { label: '电话', name: 'phone' }
+
                 ], i18n: {
-                    create: {
-                        button: "新增",
-                        title: "新建一个用户",
-                        submit: "创建"
-                    },
                     edit: {
                         button: "编辑",
                         title: "用户资料修改",
@@ -151,12 +170,11 @@
                 "ajax": '../api/json/employee',
                 "columns": [
                     { "data": null },
-                    { "data": "company" },
+                    { "data": "companyName" },
                     { "data": "floor" },
                     { "data": "number" },
                     { "data": "name" },
-                    { "data": "phone" },
-                    { "data": "nickname" }
+                    { "data": "phone" }
                 ],
                 select: true,
                 buttons: [
@@ -177,7 +195,130 @@
                     cell.innerHTML = i + 1;
                 });
             }).draw();
+            $('#table tbody').on('click', 'tr', function () {
+                var data = table.row(this).data();
+                table2.ajax.url('../api/json/userdoormap/' + data.userId).load();
+            });
 
+            editor2 = new $.fn.dataTable.Editor({
+                ajax: {
+                    create: {
+                        type: 'POST',
+                        url: '../api/json/userdoormap/add'
+                    },
+                    edit: {
+                        type: 'PUT',
+                        url: '../api/json/userdoormap/edit/_id_'
+                    },
+                    remove: {
+                        type: 'DELETE',
+                        url: '../api/json/userdoormap/remove/_id_'
+                    }
+                },
+                table: "#table2",
+                fields: [
+                    { label: '用户', name: 'user', type: 'select' },
+                    { label: '门禁名称', name: 'doorid', type: 'select' }
+                ], i18n: {
+                    create: {
+                        button: "新增",
+                        title: "新增一个门禁权限",
+                        submit: "创建"
+                    },
+                    edit: {
+                        button: "编辑",
+                        title: "门禁权限修改",
+                        submit: "更新"
+                    },
+                    remove: {
+                        button: "删除",
+                        title: "删除",
+                        submit: "删除",
+                        confirm: {
+                            _: "确定要删除 %d 条吗?",
+                            1: "确定要删除这条门禁权限信息吗?"
+                        }
+                    }
+                }
+            });
+            var table2 = $('#table2').DataTable({
+                "processing": true,
+                stateSave: true,
+                "dom": '<"top"Brf>t<"bottom"ilp>',
+                "ajax": '',
+                "columns": [
+                    { "data": null },
+                    { "data": "number" },
+                    { "data": "name" },
+                    { "data": "ip" }
+                ],
+                select: true,
+                buttons: [
+                    { extend: "create", editor: editor2 },
+                    { extend: "edit", editor: editor2 },
+                    { extend: "remove", editor: editor2 }
+                ],
+                "order": [[1, 'asc']],
+                "language": {
+                    "url": "../vendor/zh_CN.txt"
+                }
+            });
+            table2.on('order.dt search.dt', function () {
+                table2.column(0, {
+                    search: 'applied',
+                    order: 'applied'
+                }).nodes().each(function (cell, i) {
+                    cell.innerHTML = i + 1;
+                });
+            }).draw();
+
+            editor1 = new $.fn.dataTable.Editor({
+                ajax: {
+                    edit: {
+                        type: 'PUT',
+                        url: '../api/json/employee/apply/edit/_id_'
+                    },
+                    remove: {
+                        type: 'DELETE',
+                        url: '../api/json/employee/apply/remove/_id_'
+                    }
+                },
+                table: "#table1",
+                fields: [
+                    { label: '公司名称', name: 'company', type: 'readonly' },
+                    { label: '门牌号', name: 'door', type: 'readonly' },
+                    { label: '姓名', name: 'name', type: 'readonly' },
+                    { label: '电话', name: 'phone', type: 'readonly' },
+                    { label: '微信昵称', name: 'nickname', type: 'readonly' },
+                    { label: '门禁权限', name: 'userdoormap', type: 'checkbox' }
+                ], i18n: {
+                    edit: {
+                        button: "审核",
+                        title: "用户资料修改",
+                        submit: "通过"
+                    },
+                    remove: {
+                        button: "驳回",
+                        title: "驳回",
+                        submit: "驳回",
+                        confirm: {
+                            _: "确定要驳回 %d 条吗?",
+                            1: "确定要驳回这条用户申请吗?"
+                        }
+                    }
+                }
+            });
+            editor1.on('preSubmit', function (e, o, action) {
+                if (action !== 'remove') {
+                    var userdoormap = this.field('userdoormap');
+                    if (userdoormap.val().length == 0) {
+                        userdoormap.error('请选择授权的门禁');
+                    }
+                    if (this.inError()) {
+                        return false;
+                    }
+                }
+            });
             var table1 = $('#table1').DataTable({
                 "processing": true,
                 stateSave: true,
@@ -186,27 +327,16 @@
                 "columns": [
                     { "data": null },
                     { "data": "company" },
-                    { "data": "floor" },
-                    { "data": "number" },
+                    { "data": "door" },
                     { "data": "name" },
-                    { "data": "phone" },
-                    { "data": "nickname" },
-                    { "data": null }
+                    { "data": "phone" }
+
                 ],
                 select: true,
                 buttons: [
-                    { extend: "edit", editor: editor },
-                    { extend: "remove", editor: editor }
+                    { extend: "edit", editor: editor1 },
+                    { extend: "remove", editor: editor1 }
                 ],
-                "columnDefs": [{
-                    "targets": 7,//操作按钮目标列
-                    "render": function (data, type, row) {
-                        var id = '"' + row.id + '"';
-                        var html = "<a href='javascript:void(0);'  class='btn btn-default btn-xs'  onclick='pass(" + id + ")'><i class='fa fa-check'></i> 通过</a>"
-                        html += "<a href='javascript:void(0);'   onclick='deny(" + id + ")'  class='btn btn-default btn-xs'><i class='fa fa-times'></i> 拒绝</a>"
-                        return html;
-                    }
-                }],
                 "order": [[1, 'asc']],
                 "language": {
                     "url": "../vendor/zh_CN.txt"
@@ -220,12 +350,6 @@
                     cell.innerHTML = i + 1;
                 });
             }).draw();
-            function pass(id){
-                
-            }
-            function deny(id){
-
-            }
         });
     </script>
     </body>

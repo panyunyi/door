@@ -8,7 +8,6 @@ var History = AV.Object.extend('History');
 
 router.get('/', function (req, res) {
     let sess = req.session;
-    //sess.objid = "591323571b69e600686e6089";
     if (typeof (sess.objid) == "undefined") {
         let code = req.query.code;
         let state = req.query.state;
@@ -18,27 +17,34 @@ router.get('/', function (req, res) {
                 let openid = body.openid;
                 let query = new AV.Query('WxUser');
                 query.equalTo('openid', openid);
+                query.equalTo('flag', 1);
                 query.count().then(function (count) {
                     if (count == 0) {
-                        res.render('wx_register', { title: "请注册" });
+                        res.render('wx_register', { openid: openid });
                     } else if (count == 1) {
                         query.first().then(function (data) {
                             sess.objid = data.id;
                             let doorQuery = new AV.Query('Door');
                             doorQuery.equalTo('number', state);
+                            doorQuery.equalTo('isDel', false);
                             doorQuery.first().then(function (door) {
+                                if (typeof (door) == "undefined") {
+                                    return res.render('fail', { title: "未找到编号为" + state + "的门", ip: "" });
+                                }
                                 let mapQuery = new AV.Query('UserDoorMap');
                                 mapQuery.equalTo('door', door);
                                 mapQuery.equalTo('user', data);
+                                mapQuery.equalTo('isDel', false);
+                                mapQuery.greaterThanOrEqualTo('day', new Date());
                                 mapQuery.count().then(function (mapcount) {
                                     if (mapcount > 0) {
                                         let history = new History();
                                         history.set('user', data);
                                         history.set('door', door);
                                         history.save();
-                                        res.render('open', { title: "门已开", ip: door.get('ip') });
+                                        res.render('open', { title: door.get('name') + "已开", ip: door.get('ip') });
                                     } else {
-                                        res.render('open', { title: "没有此门权限", ip: "" });
+                                        res.render('fail', { title: "没有此门权限", ip: "" });
                                     }
                                 });
                             });
@@ -47,9 +53,8 @@ router.get('/', function (req, res) {
                         res.send("用户信息有重复，请联系管理员。");
                     }
                 });
-
             } else {
-                res.send("已超时，请退出菜单重进。1");
+                res.send("已超时，请退出菜单重进。");
             }
         });
     } else {
@@ -58,19 +63,25 @@ router.get('/', function (req, res) {
         user.fetch().then(function (data) {
             let doorQuery = new AV.Query('Door');
             doorQuery.equalTo('number', state);
+            doorQuery.equalTo('isDel', false);
             doorQuery.first().then(function (door) {
+                if (typeof (door) == "undefined") {
+                    return res.render('fail', { title: "未找到编号为" + state + "的门", ip: "" });
+                }
                 let mapQuery = new AV.Query('UserDoorMap');
                 mapQuery.equalTo('door', door);
                 mapQuery.equalTo('user', data);
+                mapQuery.greaterThan('day', new Date());
+                mapQuery.equalTo('isDel', false);
                 mapQuery.count().then(function (mapcount) {
                     if (mapcount > 0) {
                         let history = new History();
                         history.set('user', data);
                         history.set('door', door);
                         history.save();
-                        res.render('open', { title: "门已开", ip: door.get('ip') });
+                        res.render('open', { title: door.get('name') + "已开", ip: door.get('ip') });
                     } else {
-                        res.render('open', { title: "没有此门权限", ip: "" });
+                        res.render('fail', { title: "没有此" + door.get('name') + "的权限", ip: "" });
                     }
                 });
             });

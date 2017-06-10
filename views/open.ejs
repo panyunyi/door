@@ -1,20 +1,18 @@
 <!DOCTYPE html>
 
 <head>
-  <meta charset="utf-8">
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+  <meta name="description" content="">
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="format-detection" content="telephone=no">
+  <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1">
   <title>微信二维码门禁</title>
   <style>
     body {
       margin: 0;
       padding: 0;
-    }
-
-    #term {
-      position: absolute;
-      margin: 0;
-      padding: 0;
-      width: 100%;
-      height: 100%;
     }
   </style>
 </head>
@@ -31,10 +29,6 @@
   <script type="text/javascript">
     var socket = io.connect('http://14961rg045.iask.in:12120');
     socket.emit('clientBroadcast', { room: "eventRoom", event: "<%=ip%>", data: 1 });
-    weui.toast('<%=title%>', {
-      duration: 3000,
-      className: 'custom-classname',
-      callback: function () {window.opener=null;window.close(); }
-    });
+    weui.toast('<%=title%>', 3000);
   </script>
 </body>

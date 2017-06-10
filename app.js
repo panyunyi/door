@@ -9,6 +9,8 @@ var cookieSession = require('cookie-session');
 var users = require('./routes/users');
 var admin=require('./routes/admin');
 var datatable=require('./routes/datatable');
+var test=require('./routes/test');
+var visit=require('./routes/visit');
 // 加载云函数定义，你可以将云函数拆分到多个文件方便管理，但需要在主文件中加载它们
 require('./cloud');
 
@@ -37,7 +39,7 @@ app.use(cookieSession({
   name: 'session',
   keys: ['key1', 'key2'],
   // Cookie Options
-  maxAge: 24 * 60 * 60 * 1000 // 24 hours
+  maxAge: 1 * 60 * 60 * 1000 // 24 hours
 }));
 app.get('/', function(req, res) {
   res.render('login',{title:'用户登录'});
@@ -51,6 +53,8 @@ app.use('/wx',require('./routes/wx'));
 app.use('/open', require('./routes/open'));
 app.use('/login', users);
 app.use('/admin',admin);
+app.use('/visit',visit);
+app.use('/test',test);
 app.use('/api/json',datatable);
 app.use(function(req, res, next) {
   // 如果任何一个路由都没有返回响应，则抛出一个 404 异常给后续的异常处理器
