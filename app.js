@@ -11,6 +11,7 @@ var admin=require('./routes/admin');
 var datatable=require('./routes/datatable');
 var test=require('./routes/test');
 var visit=require('./routes/visit');
+var audit=require('./routes/audit');
 // 加载云函数定义，你可以将云函数拆分到多个文件方便管理，但需要在主文件中加载它们
 require('./cloud');
 
@@ -39,7 +40,7 @@ app.use(cookieSession({
   name: 'session',
   keys: ['key1', 'key2'],
   // Cookie Options
-  maxAge: 1 * 60 * 60 * 1000 // 24 hours
+  maxAge:  60 // 24 hours
 }));
 app.get('/', function(req, res) {
   res.render('login',{title:'用户登录'});
@@ -54,6 +55,7 @@ app.use('/open', require('./routes/open'));
 app.use('/login', users);
 app.use('/admin',admin);
 app.use('/visit',visit);
+app.use('/audit',audit);
 app.use('/test',test);
 app.use('/api/json',datatable);
 app.use(function(req, res, next) {

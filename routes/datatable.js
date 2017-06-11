@@ -182,9 +182,10 @@ router.post('/userdoormap/add', function (req, res) {
     let arr = req.body;
     let userdoormap = new UserDoorMap();
     let user = AV.Object.createWithoutData('WxUser', arr['data[0][user]']);
-    let door = AV.Object.createWithoutData('Door', arr['data[0][name]']);
+    let door = AV.Object.createWithoutData('Door', arr['data[0][doorid]']);
     userdoormap.set('user', user);
     userdoormap.set('door', door);
+    userdoormap.set('start',new Date(2015,1,1));
     userdoormap.set('day', new Date(2099, 11, 30));
     userdoormap.set('isDel', false);
     userdoormap.save().then(function (result) {
@@ -418,6 +419,7 @@ router.put('/employee/apply/edit/:id', function (req, res) {
                 let door = AV.Object.createWithoutData('Door', doorarr);
                 let userdoormap = new UserDoorMap();
                 userdoormap.set('isDel', false);
+                userdoormap.set('start',new Date(2011,1,1));
                 userdoormap.set('day', new Date(2099, 11, 30));
                 userdoormap.set('user', user);
                 userdoormap.set('door', door);
@@ -428,6 +430,7 @@ router.put('/employee/apply/edit/:id', function (req, res) {
                     let door = AV.Object.createWithoutData('Door', one);
                     let userdoormap = new UserDoorMap();
                     userdoormap.set('isDel', false);
+                    userdoormap.set('start',new Date(2011,1,1));
                     userdoormap.set('day', new Date(2099, 11, 30));
                     userdoormap.set('user', user);
                     userdoormap.set('door', door);

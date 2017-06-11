@@ -8,7 +8,7 @@ var WxUser = AV.Object.extend('WxUser');
 
 router.get('/', function (req, res) {
     let sess = req.session;
-    sess.objid = "591323571b69e600686e6089";
+    //sess.objid = "591323571b69e600686e6089";
     if (typeof (sess.objid) == "undefined") {
         let code = req.query.code;
         let state = req.query.state;
@@ -77,10 +77,14 @@ router.post('/apply', function (req, res) {
     let door = req.body.door;
     let phone2 = req.body.phone2;
     let day = req.body.day.split('-');
+    let time = req.body.time.split(':');
     let query = new AV.Query('WxUser');
     query.equalTo('openid', openid);
     query.first().then(function (user) {
         if (typeof (user) != "undefined") {
+            user.set('name', name);
+            user.set('phone', phone);
+            user.save();
             let interviewQuery = new AV.Query('WxUser');
             interviewQuery.equalTo('phone', phone2);
             interviewQuery.first().then(function (interview) {
@@ -95,10 +99,10 @@ router.post('/apply', function (req, res) {
                             visit.set('pass', 0);
                             visit.set('user', user);
                             visit.set('company', company);
-                            visit.set('day', new Date(day[0] * 1, day[1] * 1 - 1, day[2] * 1));
+                            visit.set('day', new Date(day[0] * 1, day[1] * 1 - 1, day[2] * 1, time[0] * 1, time[1] * 1, 0));
                             visit.save().then(function (visit) {
                                 let data = {
-                                    touser: interview.get('openid'), template_id: "bCm-ClhxVWyDBoN-qH7a5G6U9oUjjaFmqXlfRrHQk2o", url: '', "data": {
+                                    touser: interview.get('openid'), template_id: "bCm-ClhxVWyDBoN-qH7a5G6U9oUjjaFmqXlfRrHQk2o", url: 'http://clouddoor.leanapp.cn/audit/' + visit.id, "data": {
                                         "first": {
                                             "value": "您有新的访客申请，请审核。",
                                             "color": "#173177"

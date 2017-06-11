@@ -70,6 +70,12 @@
         </div>
         <div class="weui-cell__ft"> <i class="weui-icon-warn"></i> </div>
       </div>
+      <div class="weui-cell" id="time1">
+        <div class="weui-cell__hd"><label class="weui-label">来访时间</label></div>
+        <div class="weui-cell__bd"> <span id="time2"></span>
+        </div>
+        <div class="weui-cell__ft"> <i class="weui-icon-warn"></i> </div>
+      </div>
     </div>
     <div class="weui-btn-area"> <a id="formSubmitBtn" href="javascript:" class="weui-btn weui-btn_primary">提交</a> </div>
   </div>
@@ -92,10 +98,118 @@
         id: 'datePicker'
       });
     });
-
+    $('#time1').on("click", function () {
+      weui.picker([
+        {
+          label: '1',
+          value: 1
+        }, {
+          label: '2',
+          value: 2
+        }, {
+          label: '3',
+          value: 3
+        },
+        {
+          label: '4',
+          value: 4
+        }, {
+          label: '5',
+          value: 5
+        }, {
+          label: '6',
+          value: 6
+        },
+        {
+          label: '7',
+          value: 7
+        }, {
+          label: '8',
+          value: 8
+        }, {
+          label: '9',
+          value: 9
+        },
+        {
+          label: '10',
+          value: 10
+        }, {
+          label: '11',
+          value: 11
+        }, {
+          label: '12',
+          value: 12
+        },
+        {
+          label: '13',
+          value: 13
+        }, {
+          label: '14',
+          value: 14
+        }, {
+          label: '15',
+          value: 15
+        },
+        {
+          label: '16',
+          value: 16
+        }, {
+          label: '17',
+          value: 17
+        }, {
+          label: '18',
+          value: 18
+        },
+        {
+          label: '19',
+          value: 19
+        }, {
+          label: '20',
+          value: 20
+        }, {
+          label: '21',
+          value: 21
+        },
+        {
+          label: '22',
+          value: 22
+        }, {
+          label: '23',
+          value: 23
+        }, {
+          label: '24',
+          value: 24
+        },
+      ], [
+          {
+            label: '00',
+            value: 00
+          },
+          {
+            label: '15',
+            value: 15
+          }, {
+            label: '30',
+            value: 30
+          }, {
+            label: '45',
+            value: 45
+          }
+        ], {
+          defaultValue: ['9', '00'],
+          onChange: function (result) {
+            console.log(result);
+          },
+          onConfirm: function (result) {
+            $('#time2').attr('data-date', result[0].value + ':' + result[1].value);
+            $('#time2').html(result[0].label +":"+ result[1].label );
+          },
+          id: 'multiPickerBtn'
+        });
+    });
 
     $('#formSubmitBtn').on("click", function () {
-      $.post("/visit/apply", { openid: "<%=openid%>", phone: $('#phone').val(), name: $('#name').val(), door: $('#door').val(), content: $('#content').val(), phone2: $('#phone2').val(), day: $('#day').attr('data-date') }, function (result) {
+      $.post("/visit/apply", { openid: "<%=openid%>", phone: $('#phone').val(), name: $('#name').val(), door: $('#door').val(), content: $('#content').val(), phone2: $('#phone2').val(), day: $('#day').attr('data-date') ,time:$('#time2').attr('data-date')}, function (result) {
         if (result.error == "0") {
           window.location.replace("visit/success");
         } else {
