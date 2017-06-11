@@ -52,7 +52,7 @@ router.get('/submit/:number/:id/:openid/:interviewee/:hour', function (req, res)
                     userdoormap.set('user', visit.get('user'));
                     let time=new moment(visit.get('day'));
                     userdoormap.set('start', visit.get('day'));
-                    userdoormap.set('day',new Date(time.utc().valueOf()));
+                    userdoormap.set('day',new Date(time.add(hour,'h').utc().valueOf()));
                     callback(null, userdoormap);
                 }, function (err, results) {
                     AV.Object.saveAll(results).then(function () {
