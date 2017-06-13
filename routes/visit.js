@@ -8,7 +8,7 @@ var WxUser = AV.Object.extend('WxUser');
 
 router.get('/', function (req, res) {
     let sess = req.session;
-    sess.objid = "591323571b69e600686e6089";
+    //sess.objid = "591323571b69e600686e6089";
     if (typeof (sess.objid) == "undefined") {
         let code = req.query.code;
         let state = req.query.state;
