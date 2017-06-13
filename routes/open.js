@@ -8,6 +8,7 @@ var History = AV.Object.extend('History');
 
 router.get('/', function (req, res) {
     let sess = req.session;
+    //sess.objid = "593cc47bac502e006cedfadb";
     if (typeof (sess.objid) == "undefined") {
         let code = req.query.code;
         let state = req.query.state;
@@ -17,7 +18,7 @@ router.get('/', function (req, res) {
                 let openid = body.openid;
                 let query = new AV.Query('WxUser');
                 query.equalTo('openid', openid);
-                query.equalTo('flag', 1);
+                //query.equalTo('flag', 1);
                 query.count().then(function (count) {
                     if (count == 0) {
                         res.render('wx_register', { openid: openid });
@@ -35,6 +36,7 @@ router.get('/', function (req, res) {
                                 mapQuery.equalTo('door', door);
                                 mapQuery.equalTo('user', data);
                                 mapQuery.equalTo('isDel', false);
+                                mapQuery.lessThanOrEqualTo('start', new Date());
                                 mapQuery.greaterThanOrEqualTo('day', new Date());
                                 mapQuery.count().then(function (mapcount) {
                                     if (mapcount > 0) {
@@ -44,7 +46,7 @@ router.get('/', function (req, res) {
                                         history.save();
                                         res.render('open', { title: door.get('name') + "已开", ip: door.get('ip') });
                                     } else {
-                                        res.render('fail', { title: "没有此门权限", ip: "" });
+                                        res.render('fail', { title: "没有" + door.get('name') + "权限", ip: "" });
                                     }
                                 });
                             });
@@ -71,7 +73,8 @@ router.get('/', function (req, res) {
                 let mapQuery = new AV.Query('UserDoorMap');
                 mapQuery.equalTo('door', door);
                 mapQuery.equalTo('user', data);
-                mapQuery.greaterThan('day', new Date());
+                mapQuery.lessThanOrEqualTo('start', new Date());
+                mapQuery.greaterThanOrEqualTo('day', new Date());
                 mapQuery.equalTo('isDel', false);
                 mapQuery.count().then(function (mapcount) {
                     if (mapcount > 0) {

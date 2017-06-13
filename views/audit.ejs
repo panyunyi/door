@@ -9,9 +9,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>
-        来访审核
-    </title>
+    <title>来访审核</title>
 
     <!-- Bootstrap Core CSS -->
     <link href="../vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
@@ -36,32 +34,119 @@
 
 <body>
 
-    <div class="container">
-        <div class="row">
-            <div class="col-md-4 col-md-offset-4">
-                <div class="login-panel panel panel-default">
-                    <div class="panel-heading">
-                        <h3 class="panel-title">来访审核</h3>
-                    </div>
-                    <div class="panel-body">
-                        
-                    </div>
+    <div id="wrapper">
+
+        <div id="page-wrapper">
+            <div class="row">
+                <div class="col-lg-12">
+                    <h1 class="page-header">访客申请审核</h1>
                 </div>
+                <!-- /.col-lg-12 -->
             </div>
+            <!-- /.row -->
+            <div class="row">
+
+                <div class="col-lg-4">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            来访内容
+                        </div>
+                        <div class="panel-body">
+                            <h4>来访者:</h4>
+                            <blockquote>
+                                <p>姓名:
+                                    <%=data.get('user')%>
+                                </p>
+                                <p>手机:
+                                    <%=data.get('phone')%>
+                                </p>
+                                <p>来访目的:
+                                    <%=data.get('content')%>
+                                </p>
+                                <p>来访日期:
+                                    <%=data.get('day')%>
+                                </p>
+                                <p id='pick'>选择有效时间:
+                                    <span id='time' data-hour=2>2小时</span>
+                                </p>
+                            </blockquote>
+
+                        </div>
+
+                        <!-- /.panel-body -->
+                    </div>
+                    <%if (data.get('pass')==0){%>
+                        <div class="weui-btn-area"> <a id="agree" href="javascript:" class="weui-btn weui-btn_primary">同意</a> </div>
+                        <div class="weui-btn-area"> <a id="deny" href="javascript:" class="weui-btn weui-btn_primary">拒绝</a> </div>
+                        <%}else if(data.get('pass')==1){%>
+                            <h4 id="result1" style="text-align:center;color:green">已同意</h4>
+                            <%}else{%>
+                                <h4 id="result2" style="text-align:center;color:red">已拒绝</h4>
+                                <%}%>
+                                    <!-- /.panel -->
+                </div>
+
+                <!-- /.col-lg-4 -->
+            </div>
+            <!-- /.row -->
+
         </div>
+        <!-- /#page-wrapper -->
+
     </div>
+    <!-- /#wrapper -->
 
-    <!-- jQuery -->
-    <script src="../vendor/jquery/jquery.min.js"></script>
-
-    <!-- Bootstrap Core JavaScript -->
-    <script src="../vendor/bootstrap/js/bootstrap.min.js"></script>
-
-    <!-- Metis Menu Plugin JavaScript -->
-    <script src="../vendor/metisMenu/metisMenu.min.js"></script>
-
-    <!-- Custom Theme JavaScript -->
-    <script src="../dist/js/sb-admin-2.js"></script>
+    <script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://res.wx.qq.com/open/libs/weui/1.1.0/weui.min.css">
+    <script type="text/javascript" src="https://res.wx.qq.com/open/libs/weuijs/1.1.1/weui.min.js"></script>
+    <script type="text/javascript">
+        $('#agree').on('click', function () {
+            $('#agree').attr('disabled', true);
+            $.get('/audit/submit/1/<%=data.id%>/<%=data.get("openid")%>/<%=data.get("interviewee")%>/'+$('#time').attr('data-hour'), function (data) {
+                if (data == '0') {
+                    $('#agree').css('display', 'none');
+                    $('#deny').css('display', 'none');
+                    $('.col-lg-4').append('<h4 id="result1" style="text-align:center;color:green">已同意</h4>');
+                }
+            });
+        });
+        $('#deny').on('click', function () {
+            $.get('/audit/submit/-1/<%=data.id%>/<%=data.get("openid")%>/<%=data.get("interviewee")%>', function (data) {
+                if (data == '0') {
+                    $('#agree').css('display', 'none');
+                    $('#deny').css('display', 'none');
+                    $('.col-lg-4').append('<h4 id="result2" style="text-align:center;color:red">已拒绝</h4>');
+                }
+            });
+        });
+        $('#pick').on('click', function () {
+            weui.picker([
+                {
+                    label: '2小时',
+                    value: 2
+                }, {
+                    label: '4小时',
+                    value: 4
+                }, {
+                    label: '6小时',
+                    value: 6
+                },{
+                    label: '8小时',
+                    value: 8
+                }
+            ], {
+                    defaultValue: ['2小时'],
+                    onChange: function (result) {
+                        console.log(result);
+                    },
+                    onConfirm: function (result) {
+                        $('#time').attr('data-hour',result[0].value);
+                        $('#time').html(result[0]+"小时");
+                    },
+                    id: 'pick'
+                });
+        });
+    </script>
 
 </body>
 
