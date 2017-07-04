@@ -95,6 +95,7 @@ router.post('/register', function (req, res) {
                     user.save();
                     res.send({ error: 0, msg: "" });
                 } else {
+                    data.set('company',req.body.company);
                     data.set('name', req.body.name);
                     data.set('flag', 0);
                     data.set('door', req.body.door);

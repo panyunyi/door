@@ -102,17 +102,17 @@ router.post('/apply', function (req, res) {
                             visit.set('day', new Date(day[0] * 1, day[1] * 1 - 1, day[2] * 1, time[0] * 1, time[1] * 1, 0));
                             visit.save().then(function (visit) {
                                 let data = {
-                                    touser: interview.get('openid'), template_id: "bCm-ClhxVWyDBoN-qH7a5G6U9oUjjaFmqXlfRrHQk2o", url: 'http://clouddoor.leanapp.cn/audit/' + visit.id, "data": {
+                                    touser: interview.get('openid'), template_id: "0MfPUimCvcbKya-LWH3UfW2vqdPMZgPJKW3XpzUV2DQ", url: 'http://clouddoor.leanapp.cn/audit/' + visit.id, "data": {
                                         "first": {
                                             "value": "您有新的访客申请，请审核。",
                                             "color": "#173177"
                                         },
                                         "keyword1": {
-                                            "value": visit.id,
+                                            "value": name,
                                             "color": "#173177"
                                         },
                                         "keyword2": {
-                                            "value": name,
+                                            "value": content,
                                             "color": "#173177"
                                         },
                                         "keyword3": {
@@ -120,10 +120,6 @@ router.post('/apply', function (req, res) {
                                             "color": "#173177"
                                         },
                                         "keyword4": {
-                                            "value": content,
-                                            "color": "#173177"
-                                        },
-                                        "keyword5": {
                                             "value": req.body.day,
                                             "color": "#173177"
                                         },

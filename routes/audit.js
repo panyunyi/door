@@ -40,6 +40,7 @@ router.get('/submit/:number/:id/:openid/:interviewee/:hour', function (req, res)
     visit.set('pass', number);
     visit.save();
     visit.fetch().then(function () {
+        let time=new moment(visit.get('day'));
         if (number == 1) {
             let query = new AV.Query('UserDoorMap');
             query.equalTo('isDel', false);
@@ -57,7 +58,7 @@ router.get('/submit/:number/:id/:openid/:interviewee/:hour', function (req, res)
                 }, function (err, results) {
                     AV.Object.saveAll(results).then(function () {
                         let data = {
-                            touser: openid, template_id: "DocKeOwYvRtg7kAQ_QWQfjPdIzyTvoiHrRMIuDFhSmY", url: '', "data": {
+                            touser: openid, template_id: "HyIvEtj7tO5bCsuFNH5FyJgFYQy3UkHYdFm0MVpkABM", url: '', "data": {
                                 "first": {
                                     "value": "您的预约结果如下。",
                                     "color": "#173177"
@@ -71,7 +72,11 @@ router.get('/submit/:number/:id/:openid/:interviewee/:hour', function (req, res)
                                     "color": "#173177"
                                 },
                                 "keyword3": {
-                                    "value": interviewee,
+                                    "value": time.format('LLLL'),
+                                    "color": "#173177"
+                                },
+                                "keyword4": {
+                                    "value": "审核通过",
                                     "color": "#173177"
                                 },
                                 "remark": {
@@ -87,7 +92,7 @@ router.get('/submit/:number/:id/:openid/:interviewee/:hour', function (req, res)
             });
         } else {
             let data = {
-                touser: openid, template_id: "DocKeOwYvRtg7kAQ_QWQfjPdIzyTvoiHrRMIuDFhSmY", url: '', "data": {
+                touser: openid, template_id: "HyIvEtj7tO5bCsuFNH5FyJgFYQy3UkHYdFm0MVpkABM", url: '', "data": {
                     "first": {
                         "value": "您的预约结果如下。",
                         "color": "#173177"
