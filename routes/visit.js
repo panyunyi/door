@@ -120,7 +120,7 @@ router.post('/apply', function (req, res) {
                                             "color": "#173177"
                                         },
                                         "keyword4": {
-                                            "value": req.body.day,
+                                            "value": req.body.day + " " + req.body.time,
                                             "color": "#173177"
                                         },
                                         "remark": {

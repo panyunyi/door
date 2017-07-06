@@ -17,8 +17,8 @@ router.get('/:id', function (req, res) {
     query.first().then(function (data) {
         if (typeof (data) != "undefined") {
             let time = new moment(data.get('day'));
-            data.set('openid',data.get('user').get('openid'));
-            data.set('interviewee',data.get('interviewee').get('name'));
+            data.set('openid', data.get('user').get('openid'));
+            data.set('interviewee', data.get('interviewee').get('name'));
             data.set('phone', data.get('user').get('phone'));
             data.set('user', data.get('user').get('name'));
             data.set('day', time.format('LLLL'));
@@ -30,17 +30,18 @@ router.get('/:id', function (req, res) {
 });
 
 var UserDoorMap = AV.Object.extend('UserDoorMap');
-router.get('/submit/:number/:id/:openid/:interviewee/:hour', function (req, res) {
+router.get('/submit/:number/:id/:openid/:hour', function (req, res) {
     let id = req.params.id;
-    let openid=req.params.openid;
-    let interviewee=req.params.interviewee;
+    let openid = req.params.openid;
     let number = req.params.number * 1;
-    let hour=req.params.hour*1;
+    let hour = req.params.hour * 1;
+    let name = req.query.name;
+    let phone = req.query.phone;
     let visit = AV.Object.createWithoutData('Visit', id);
     visit.set('pass', number);
     visit.save();
     visit.fetch().then(function () {
-        let time=new moment(visit.get('day'));
+        let audittime = new moment(visit.get('updatedAt'));
         if (number == 1) {
             let query = new AV.Query('UserDoorMap');
             query.equalTo('isDel', false);
@@ -51,9 +52,9 @@ router.get('/submit/:number/:id/:openid/:interviewee/:hour', function (req, res)
                     userdoormap.set('isDel', false);
                     userdoormap.set('door', result.get('door'));
                     userdoormap.set('user', visit.get('user'));
-                    let time=new moment(visit.get('day'));
+                    let time = new moment(visit.get('day'));
                     userdoormap.set('start', visit.get('day'));
-                    userdoormap.set('day',new Date(time.add(hour,'h').utc().valueOf()));
+                    userdoormap.set('day', new Date(time.add(hour, 'h').utc().valueOf()));
                     callback(null, userdoormap);
                 }, function (err, results) {
                     AV.Object.saveAll(results).then(function () {
@@ -64,19 +65,19 @@ router.get('/submit/:number/:id/:openid/:interviewee/:hour', function (req, res)
                                     "color": "#173177"
                                 },
                                 "keyword1": {
-                                    "value": visit.id,
+                                    "value": name,
                                     "color": "#173177"
                                 },
                                 "keyword2": {
-                                    "value": "审核通过",
+                                    "value": phone,
                                     "color": "#173177"
                                 },
                                 "keyword3": {
-                                    "value": time.format('LLLL'),
+                                    "value": audittime.format('LLLL'),
                                     "color": "#173177"
                                 },
                                 "keyword4": {
-                                    "value": "审核通过",
+                                    "value": "允许访问",
                                     "color": "#173177"
                                 },
                                 "remark": {
@@ -98,15 +99,19 @@ router.get('/submit/:number/:id/:openid/:interviewee/:hour', function (req, res)
                         "color": "#173177"
                     },
                     "keyword1": {
-                        "value": visit.id,
+                        "value": name,
                         "color": "#173177"
                     },
                     "keyword2": {
-                        "value": "未通过",
+                        "value": phone,
                         "color": "#173177"
                     },
                     "keyword3": {
-                        "value": interviewee,
+                        "value": audittime.format('LLLL'),
+                        "color": "#173177"
+                    },
+                    "keyword4": {
+                        "value": "拒绝访问",
                         "color": "#173177"
                     },
                     "remark": {

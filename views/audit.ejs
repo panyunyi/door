@@ -52,7 +52,7 @@
                             来访内容
                         </div>
                         <div class="panel-body">
-                            <h4>来访者:</h4>
+                            <!--<h4>来访者:</h4>-->
                             <blockquote>
                                 <p>姓名:
                                     <%=data.get('user')%>
@@ -66,7 +66,7 @@
                                 <p>来访日期:
                                     <%=data.get('day')%>
                                 </p>
-                                <p id='pick'>选择有效时间:
+                                <p id='pick'>点击选择门禁有效时间:
                                     <span id='time' data-hour=2>2小时</span>
                                 </p>
                             </blockquote>
@@ -77,7 +77,7 @@
                     </div>
                     <%if (data.get('pass')==0){%>
                         <div class="weui-btn-area"> <a id="agree" href="javascript:" class="weui-btn weui-btn_primary">同意</a> </div>
-                        <div class="weui-btn-area"> <a id="deny" href="javascript:" class="weui-btn weui-btn_primary">拒绝</a> </div>
+                        <div class="weui-btn-area"> <a id="deny" href="javascript:" class="weui-btn weui-btn_primary" style="background-color:#d9534f">拒绝</a> </div>
                         <%}else if(data.get('pass')==1){%>
                             <h4 id="result1" style="text-align:center;color:green">已同意</h4>
                             <%}else{%>
@@ -102,7 +102,7 @@
     <script type="text/javascript">
         $('#agree').on('click', function () {
             $('#agree').attr('disabled', true);
-            $.get('/audit/submit/1/<%=data.id%>/<%=data.get("openid")%>/<%=data.get("interviewee")%>/'+$('#time').attr('data-hour'), function (data) {
+            $.get('/audit/submit/1/<%=data.id%>/<%=data.get("openid")%>/'+$('#time').attr('data-hour')+'?name=<%=data.get("user")%>&phone=<%=data.get("phone")%>', function (data) {
                 if (data == '0') {
                     $('#agree').css('display', 'none');
                     $('#deny').css('display', 'none');
@@ -111,7 +111,7 @@
             });
         });
         $('#deny').on('click', function () {
-            $.get('/audit/submit/-1/<%=data.id%>/<%=data.get("openid")%>/<%=data.get("interviewee")%>', function (data) {
+            $.get('/audit/submit/-1/<%=data.id%>/<%=data.get("openid")%>/0?name=<%=data.get("user")%>&phone=<%=data.get("phone")%>', function (data) {
                 if (data == '0') {
                     $('#agree').css('display', 'none');
                     $('#deny').css('display', 'none');
