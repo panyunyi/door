@@ -9,7 +9,7 @@ var WxUser = AV.Object.extend('WxUser');
 router.get('/', function (req, res) {
     let sess = req.session;
     //sess.objid = "591323571b69e600686e6089";
-    if (typeof (sess.objid) == "undefined") {
+    //if (typeof (sess.objid) == "undefined") {
         let code = req.query.code;
         let state = req.query.state;
         let client = request.createClient('https://api.weixin.qq.com/sns/oauth2/');
@@ -55,17 +55,17 @@ router.get('/', function (req, res) {
                 res.send("已超时，请退出菜单重进。");
             }
         });
-    } else {
-        let user = AV.Object.createWithoutData('WxUser', sess.objid);
-        user.fetch().then(function () {
-            if (typeof (user.get('openid')) == "undefined" || user.get('flag') < 0) {
-                req.session = null;
-                res.render('fail', { title: "退出重试" });
-            } else {
-                res.render('visit', { openid: user.get('openid') });
-            }
-        });
-    }
+    // } else {
+    //     let user = AV.Object.createWithoutData('WxUser', sess.objid);
+    //     user.fetch().then(function () {
+    //         if (typeof (user.get('openid')) == "undefined" || user.get('flag') < 0) {
+    //             req.session = null;
+    //             res.render('fail', { title: "退出重试" });
+    //         } else {
+    //             res.render('visit', { openid: user.get('openid') });
+    //         }
+    //     });
+    // }
 });
 
 var Visit = AV.Object.extend('Visit');
