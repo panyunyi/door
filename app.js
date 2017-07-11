@@ -12,6 +12,7 @@ var datatable=require('./routes/datatable');
 var test=require('./routes/test');
 var visit=require('./routes/visit');
 var audit=require('./routes/audit');
+var menu=require('./routes/menu');
 // 加载云函数定义，你可以将云函数拆分到多个文件方便管理，但需要在主文件中加载它们
 require('./cloud');
 
@@ -57,6 +58,7 @@ app.use('/admin',admin);
 app.use('/visit',visit);
 app.use('/audit',audit);
 app.use('/test',test);
+app.use('/menu',menu);
 app.use('/api/json',datatable);
 app.use(function(req, res, next) {
   // 如果任何一个路由都没有返回响应，则抛出一个 404 异常给后续的异常处理器

@@ -44,9 +44,9 @@ router.get('/', function (req, res) {
                                         history.set('user', data);
                                         history.set('door', door);
                                         history.save();
-                                        res.render('open', { title: door.get('name') + "已开", ip: door.get('ip') });
+                                        res.render('open', { title: door.get('name') + "已开", ip: door.get('ip'), state: 1 });
                                     } else {
-                                        res.render('fail', { title: "没有" + door.get('name') + "权限", ip: "" });
+                                        res.render('fail', { title: "没有" + door.get('name') + "权限", ip: "", state: 0 });
                                     }
                                 });
                             });
@@ -82,9 +82,9 @@ router.get('/', function (req, res) {
                         history.set('user', data);
                         history.set('door', door);
                         history.save();
-                        res.render('open', { title: door.get('name') + "已开", ip: door.get('ip') });
+                        res.render('open', { title: door.get('name') + "已开", ip: door.get('ip'), state: 1 });
                     } else {
-                        res.render('fail', { title: "没有此" + door.get('name') + "的权限", ip: "" });
+                        res.render('fail', { title: "没有" + door.get('name') + "的权限", ip: "", state: 0 });
                     }
                 });
             });
