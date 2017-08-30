@@ -43,20 +43,8 @@
                 </div>
                 <div class="weui-cell__ft"> <i class="weui-icon-warn"></i> </div>
             </div>
-            <div class="weui-cell">
-                <div class="weui-cell__hd"><label class="weui-label">门牌号</label></div>
-                <div class="weui-cell__bd"> <input id="door" class="weui-input" type="text" required="" maxlength="8" placeholder="输入门牌号" emptytips="请输入门牌号"
-                        notmatchtips="请输入门牌号">
-                </div>
-                <div class="weui-cell__ft"> <i class="weui-icon-warn"></i> </div>
-            </div>
-            <div class="weui-cell">
-                <div class="weui-cell__hd"><label class="weui-label">公司</label></div>
-                <div class="weui-cell__bd"> <input id="company" class="weui-input" type="text" required="" maxlength="20" placeholder="请输入公司名称" emptytips="请输入公司名称"
-                        notmatchtips="请输入公司名称">
-                </div>
-                <div class="weui-cell__ft"> <i class="weui-icon-warn"></i> </div>
-            </div>
+            <a href="javascript:;" id="cascadePickerBtn" class="weui-btn weui-btn_default">选择公司</a>
+            <input hidden id="company">
         </div>
         <div class="weui-btn-area"> <a id="formSubmitBtn" href="javascript:" class="weui-btn weui-btn_primary">提交</a> </div>
     </div>
@@ -64,8 +52,69 @@
     <link rel="stylesheet" href="https://res.wx.qq.com/open/libs/weui/1.1.0/weui.min.css">
     <script type="text/javascript" src="https://res.wx.qq.com/open/libs/weuijs/1.1.1/weui.min.js"></script>
     <script type="text/javascript">
+        $('#cascadePickerBtn').on("click", function () {
+            weui.picker([
+                {
+                    label: '飞机票',
+                    value: 0,
+                    children: [
+                        {
+                            label: '经济舱',
+                            value: 1
+                        },
+                        {
+                            label: '商务舱',
+                            value: 2
+                        }
+                    ]
+                },
+                {
+                    label: '火车票',
+                    value: 1,
+                    children: [
+                        {
+                            label: '卧铺',
+                            value: 1,
+                            disabled: true // 不可用
+                        },
+                        {
+                            label: '坐票',
+                            value: 2
+                        },
+                        {
+                            label: '站票',
+                            value: 3
+                        }
+                    ]
+                },
+                {
+                    label: '汽车票',
+                    value: 3,
+                    children: [
+                        {
+                            label: '快班',
+                            value: 1
+                        },
+                        {
+                            label: '普通',
+                            value: 2
+                        }
+                    ]
+                }
+            ], {
+                    className: 'custom-classname',
+                    defaultValue: [1, 3],
+                    onChange: function (result) {
+                        console.log(result)
+                    },
+                    onConfirm: function (result) {
+                        $('#company').attr('data-name',result[1].value);
+                    },
+                    id: 'doubleLinePicker'
+                });
+        });
         $('#formSubmitBtn').on("click", function () {
-            $.post("/wx/register", { openid: "<%=openid%>", phone: $('#phone').val(), name: $('#name').val(), door: $('#door').val(), company: $('#company').val() }, function (result) {
+            $.post("/wx/register", { openid: "<%=openid%>", phone: $('#phone').val(), name: $('#name').val(), company: $('#company').attr('data-name') }, function (result) {
                 if (result.error == "0") {
                     window.location.replace("wx/success");
                 } else {

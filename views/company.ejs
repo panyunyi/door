@@ -35,6 +35,32 @@
                 </div>
             </div>
             <!-- /.row -->
+            <div id="row2" class="row">
+                <div class="col-lg-12">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            门禁权限设置
+                        </div>
+                        <!-- /.panel-heading -->
+                        <div class="panel-body">
+                            <table id="table2" class="ui celled table" cellspacing="0" width="100%">
+                                <thead>
+                                    <tr>
+                                        <th>序号</th>
+                                        <th>门禁名称</th>
+                                        <th>门禁编号</th>
+                                        <th>ip</th>
+                                    </tr>
+                                </thead>
+                            </table>
+                            <!-- /.table-responsive -->
+
+                        </div>
+                        <!-- /.panel-body -->
+                    </div>
+                    <!-- /.panel -->
+                </div>
+            </div>
         </div>
         <!-- /.container-fluid -->
     </div>
@@ -137,6 +163,81 @@
             });
             table.on('order.dt search.dt', function () {
                 table.column(0, {
+                    search: 'applied',
+                    order: 'applied'
+                }).nodes().each(function (cell, i) {
+                    cell.innerHTML = i + 1;
+                });
+            }).draw();
+            $('#table tbody').on('click', 'tr', function () {
+                var data = table.row(this).data();
+                table2.ajax.url('../api/json/companydoormap/' + data.DT_RowId).load();
+            });
+            editor2 = new $.fn.dataTable.Editor({
+                ajax: {
+                    create: {
+                        type: 'POST',
+                        url: '../api/json/companydoormap/add'
+                    },
+                    edit: {
+                        type: 'PUT',
+                        url: '../api/json/companydoormap/edit/_id_'
+                    },
+                    remove: {
+                        type: 'DELETE',
+                        url: '../api/json/companydoormap/remove/_id_'
+                    }
+                },
+                table: "#table2",
+                fields: [
+                    { label: '公司', name: 'company', type: 'select' },
+                    { label: '门禁名称', name: 'doorid', type: 'select' }
+                ], i18n: {
+                    create: {
+                        button: "新增",
+                        title: "新增一个门禁权限",
+                        submit: "创建"
+                    },
+                    edit: {
+                        button: "编辑",
+                        title: "门禁权限修改",
+                        submit: "更新"
+                    },
+                    remove: {
+                        button: "删除",
+                        title: "删除",
+                        submit: "删除",
+                        confirm: {
+                            _: "确定要删除 %d 条吗?",
+                            1: "确定要删除这条门禁权限信息吗?"
+                        }
+                    }
+                }
+            });
+            var table2 = $('#table2').DataTable({
+                "processing": true,
+                stateSave: true,
+                "dom": '<"top"Brf>t<"bottom"ilp>',
+                "ajax": '',
+                "columns": [
+                    { "data": null },
+                    { "data": "number" },
+                    { "data": "name" },
+                    { "data": "ip" }
+                ],
+                select: true,
+                buttons: [
+                    { extend: "create", editor: editor2 },
+                    { extend: "edit", editor: editor2 },
+                    { extend: "remove", editor: editor2 }
+                ],
+                "order": [[3, 'asc']],
+                "language": {
+                    "url": "../vendor/zh_CN.txt"
+                }
+            });
+            table2.on('order.dt search.dt', function () {
+                table2.column(0, {
                     search: 'applied',
                     order: 'applied'
                 }).nodes().each(function (cell, i) {

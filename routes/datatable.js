@@ -18,6 +18,59 @@ router.get('/company', function (req, res) {
     });
 });
 
+router.get('/companydoormap/:id', function (req, res) {
+    let resdata = {};
+    let companyarr = [];
+    function promise1(callback) {
+        let id = req.params.id;
+        let company = AV.Object.createWithoutData('Company', id);
+        company.fetch().then(function () {
+            companyarr.push({ 'label': company.get('name'), 'value': company.id });
+            let query = new AV.Query('CompanyDoorMap');
+            query.equalTo('isDel', false);
+            query.equalTo('company', company);
+            query.include('door');
+            query.find().then(function (results) {
+                async.map(results, function (result, callback1) {
+                    result.set('DT_RowId', result.id);
+                    result.set('name', result.get('door').get('name'));
+                    result.set('number', result.get('door').get('number'));
+                    result.set('ip', result.get('door').get('ip'));
+                    result.set('doorid', result.get('door').id);
+                    callback1(null, result);
+                }, function (err, results) {
+                    resdata["data"] = results;
+                    callback(null, 1);
+                });
+            });
+        });
+    }
+    function promise2(callback) {
+        let query = new AV.Query('Door');
+        query.equalTo('isDel', false);
+        query.ascending('number');
+        query.find().then(function (results) {
+            async.map(results, function (result, callback1) {
+                result.set('label', result.get('name'));
+                result.set('value', result.id);
+                callback1(null, result);
+            }, function (err, data) {
+                callback(null, data);
+            });
+        });
+    }
+    async.parallel([
+        function (callback) {
+            promise1(callback);
+        },
+        function (callback) {
+            promise2(callback);
+        }], function (err, results) {
+            resdata["options"] = Object.assign({ "doorid": results[1], "company": companyarr });
+            res.jsonp(resdata);
+        });
+});
+
 var Company = AV.Object.extend('Company');
 router.post('/company/add', function (req, res) {
     let arr = req.body;
@@ -63,6 +116,70 @@ router.delete('/company/remove/:id', function (req, res) {
     let company = AV.Object.createWithoutData('Company', id);
     company.set('isDel', true);
     company.save().then(function () {
+        res.jsonp({ "data": [] });
+    });
+});
+
+var CompanyDoorMap = AV.Object.extend('CompanyDoorMap');
+router.post('/companydoormap/add', function (req, res) {
+    let arr = req.body;
+    let companydoormap = new CompanyDoorMap();
+    let company = AV.Object.createWithoutData('Company', arr['data[0][company]']);
+    let door = AV.Object.createWithoutData('Door', arr['data[0][doorid]']);
+    let query = new AV.Query('CompanyDoorMap');
+    query.equalTo('company', company);
+    query.equalTo('door', door);
+    query.equalTo('isDel', false);
+    query.count().then(function (count) {
+        if (count > 0) {
+            res.jsonp({ "data": [], "fieldErrors": [{ "name": "doorid", "status": "已存在" }] });
+        } else {
+            companydoormap.set('company', company);
+            companydoormap.set('door', door);
+            companydoormap.set('isDel', false);
+            companydoormap.save().then(function (result) {
+                let data = [];
+                result.set('DT_RowId', result.id);
+                door.fetch().then(function () {
+                    result.set('name', result.get('door').get('name'));
+                    result.set('number', result.get('door').get('number'));
+                    result.set('ip', result.get('door').get('ip'));
+                    data.push(result);
+                    res.jsonp({ "data": data });
+                });
+            }, function (error) {
+                console.log(error);
+            });
+        }
+    });
+});
+
+router.put('/companydoormap/edit/:id', function (req, res) {
+    let arr = req.body;
+    let id = req.params.id;
+    let companydoormap = AV.Object.createWithoutData('CompanyDoorMap', id);
+    let door = AV.Object.createWithoutData('Door', arr['data[' + id + '][doorid]']);
+    companydoormap.set('door', door);
+    companydoormap.save().then(function (result) {
+        let data = [];
+        result.set('DT_RowId', result.id);
+        door.fetch().then(function () {
+            result.set('name', result.get('door').get('name'));
+            result.set('number', result.get('door').get('number'));
+            result.set('ip', result.get('door').get('ip'));
+            data.push(result);
+            res.jsonp({ "data": data });
+        });
+    }, function (error) {
+        console.log(error);
+    });
+});
+
+router.delete('/companydoormap/remove/:id', function (req, res) {
+    let id = req.params.id;
+    let userdoormap = AV.Object.createWithoutData('CompanyDoorMap', id);
+    userdoormap.set('isDel', true);
+    userdoormap.save().then(function () {
         res.jsonp({ "data": [] });
     });
 });
@@ -155,6 +272,7 @@ router.get('/userdoormap/:id', function (req, res) {
     function promise2(callback) {
         let query = new AV.Query('Door');
         query.equalTo('isDel', false);
+        query.ascending('number');
         query.find().then(function (results) {
             async.map(results, function (result, callback1) {
                 result.set('label', result.get('name'));
@@ -183,23 +301,33 @@ router.post('/userdoormap/add', function (req, res) {
     let userdoormap = new UserDoorMap();
     let user = AV.Object.createWithoutData('WxUser', arr['data[0][user]']);
     let door = AV.Object.createWithoutData('Door', arr['data[0][doorid]']);
-    userdoormap.set('user', user);
-    userdoormap.set('door', door);
-    userdoormap.set('start',new Date(2015,1,1));
-    userdoormap.set('day', new Date(2099, 11, 30));
-    userdoormap.set('isDel', false);
-    userdoormap.save().then(function (result) {
-        let data = [];
-        result.set('DT_RowId', result.id);
-        door.fetch().then(function () {
-            result.set('name', result.get('door').get('name'));
-            result.set('number', result.get('door').get('number'));
-            result.set('ip', result.get('door').get('ip'));
-            data.push(result);
-            res.jsonp({ "data": data });
-        });
-    }, function (error) {
-        console.log(error);
+    let query = new AV.Query('UserDoorMap');
+    query.equalTo('user', user);
+    query.equalTo('door', door);
+    query.equalTo('isDel', false);
+    query.count().then(function (count) {
+        if (count > 0) {
+            res.jsonp({ "data": [], "fieldErrors": [{ "name": "doorid", "status": "已存在" }] });
+        } else {
+            userdoormap.set('user', user);
+            userdoormap.set('door', door);
+            userdoormap.set('start', new Date(2015, 1, 1));
+            userdoormap.set('day', new Date(2099, 11, 30));
+            userdoormap.set('isDel', false);
+            userdoormap.save().then(function (result) {
+                let data = [];
+                result.set('DT_RowId', result.id);
+                door.fetch().then(function () {
+                    result.set('name', result.get('door').get('name'));
+                    result.set('number', result.get('door').get('number'));
+                    result.set('ip', result.get('door').get('ip'));
+                    data.push(result);
+                    res.jsonp({ "data": data });
+                });
+            }, function (error) {
+                console.log(error);
+            });
+        }
     });
 });
 
@@ -402,7 +530,6 @@ router.put('/employee/apply/edit/:id', function (req, res) {
     let arr = req.body;
     let id = req.params.id;
     let doorarr = arr['data[' + id + '][userdoormap][]'];
-    console.log(typeof (doorarr));
     let user = AV.Object.createWithoutData('WxUser', id);
     let companyQuery = new AV.Query('Company');
     companyQuery.equalTo('number', arr['data[' + id + '][door]']);
@@ -419,7 +546,7 @@ router.put('/employee/apply/edit/:id', function (req, res) {
                 let door = AV.Object.createWithoutData('Door', doorarr);
                 let userdoormap = new UserDoorMap();
                 userdoormap.set('isDel', false);
-                userdoormap.set('start',new Date(2011,1,1));
+                userdoormap.set('start', new Date(2011, 1, 1));
                 userdoormap.set('day', new Date(2099, 11, 30));
                 userdoormap.set('user', user);
                 userdoormap.set('door', door);
@@ -430,7 +557,7 @@ router.put('/employee/apply/edit/:id', function (req, res) {
                     let door = AV.Object.createWithoutData('Door', one);
                     let userdoormap = new UserDoorMap();
                     userdoormap.set('isDel', false);
-                    userdoormap.set('start',new Date(2011,1,1));
+                    userdoormap.set('start', new Date(2011, 1, 1));
                     userdoormap.set('day', new Date(2099, 11, 30));
                     userdoormap.set('user', user);
                     userdoormap.set('door', door);

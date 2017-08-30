@@ -89,11 +89,12 @@ router.post('/apply', function (req, res) {
             interviewQuery.equalTo('phone', phone2);
             interviewQuery.first().then(function (interview) {
                 if (typeof (interview) != "undefined") {
-                    let companyQuery = new AV.Query('Company');
-                    companyQuery.equalTo('number', door);
-                    companyQuery.first().then(function (company) {
-                        if (typeof (company) != "undefined") {
+                    // let companyQuery = new AV.Query('Company');
+                    // companyQuery.equalTo('number', door);
+                    // companyQuery.first().then(function (company) {
+                    //     if (typeof (company) != "undefined") {
                             let visit = new Visit();
+                            visit.set('target',door);
                             visit.set('content', content);
                             visit.set('interviewee', interview);
                             visit.set('pass', 0);
@@ -132,10 +133,10 @@ router.post('/apply', function (req, res) {
                                 getTokenAndSendMsg(data);
                                 res.send({ error: 0, msg: "" });
                             });
-                        } else {
-                            res.send({ error: 1, msg: "公司门牌号正确。" });
-                        }
-                    });
+                    //     } else {
+                    //         res.send({ error: 1, msg: "公司门牌号正确。" });
+                    //     }
+                    // });
                 } else {
                     res.send({ error: 1, msg: "被访者的手机号不正确。" });
                 }
