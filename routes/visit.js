@@ -99,7 +99,6 @@ router.post('/apply', function (req, res) {
                             visit.set('interviewee', interview);
                             visit.set('pass', 0);
                             visit.set('user', user);
-                            visit.set('company', company);
                             visit.set('day', new Date(day[0] * 1, day[1] * 1 - 1, day[2] * 1, time[0] * 1, time[1] * 1, 0));
                             visit.save().then(function (visit) {
                                 let data = {

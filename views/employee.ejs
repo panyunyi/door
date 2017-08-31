@@ -47,7 +47,7 @@
                                             <tr>
                                                 <th>序号</th>
                                                 <th>公司名称</th>
-                                                <th>门牌号</th>
+                                                <th>楼层</th>
                                                 <th>姓名</th>
                                                 <th>电话</th>
                                             </tr>
@@ -285,12 +285,13 @@
                 },
                 table: "#table1",
                 fields: [
+                    {type:'hidden',name:'companyId'},
                     { label: '公司名称', name: 'company', type: 'readonly' },
-                    { label: '门牌号', name: 'door', type: 'readonly' },
+                    { label: '楼层', name: 'floor', type: 'readonly' },
                     { label: '姓名', name: 'name', type: 'readonly' },
                     { label: '电话', name: 'phone', type: 'readonly' },
                     { label: '微信昵称', name: 'nickname', type: 'readonly' },
-                    { label: '门禁权限', name: 'userdoormap', type: 'checkbox' }
+                    { label: '门禁权限', name: 'companydoormap', type: 'readonly' }
                 ], i18n: {
                     edit: {
                         button: "审核",
@@ -308,17 +309,17 @@
                     }
                 }
             });
-            editor1.on('preSubmit', function (e, o, action) {
-                if (action !== 'remove') {
-                    var userdoormap = this.field('userdoormap');
-                    if (userdoormap.val().length == 0) {
-                        userdoormap.error('请选择授权的门禁');
-                    }
-                    if (this.inError()) {
-                        return false;
-                    }
-                }
-            });
+            // editor1.on('preSubmit', function (e, o, action) {
+            //     if (action !== 'remove') {
+            //         var userdoormap = this.field('userdoormap');
+            //         if (userdoormap.val().length == 0) {
+            //             userdoormap.error('请选择授权的门禁');
+            //         }
+            //         if (this.inError()) {
+            //             return false;
+            //         }
+            //     }
+            // });
             var table1 = $('#table1').DataTable({
                 "processing": true,
                 stateSave: true,
@@ -327,7 +328,7 @@
                 "columns": [
                     { "data": null },
                     { "data": "company" },
-                    { "data": "door" },
+                    { "data": "floor" },
                     { "data": "name" },
                     { "data": "phone" }
 

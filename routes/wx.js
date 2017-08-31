@@ -5,10 +5,55 @@ var request = require('request-json');
 var appid = process.env.wx_appid;
 var secret = process.env.wx_secret;
 var WxUser = AV.Object.extend('WxUser');
+var async = require('async');
+
+function combine(companies, floorArr) {
+    let arr = [];
+    async.map(floorArr, function (floor, callback1) {
+        let onefloor = { label: floor + "F", value: floor };
+        let comArr = [];
+        async.map(companies, function (company, callback2) {
+            let onecompany = { label: company.name, value: company.id };
+            if (company.floor == floor) {
+                comArr.push(onecompany);
+            }
+            callback2(null, 1);
+        }, function (err, companies) {
+            onefloor['children'] = comArr;
+            callback1(null, onefloor);
+        });
+    }, function (err, floors) {
+        arr = floors;
+    });
+    return arr;
+}
+
+router.get('/company', function (req, res) {
+    let companyQuery = new AV.Query('Company');
+    let floorArr=[];
+    companyQuery.equalTo('isDel', false);
+    companyQuery.ascending('floor');
+    companyQuery.find().then(function (companies) {
+        async.map(companies, function (company, callback) {
+            let floor = company.get('floor');
+            let one = { name: company.get('name'), floor: floor, id: company.id };
+            if (floorArr.indexOf(floor) == -1) {
+                floorArr.push(floor);
+            }
+            callback(null, one);
+        }, function (err, companies) {
+            let json = combine(companies, floorArr);
+            res.jsonp({ data: json });
+        });
+    });
+});
 
 router.get('/', function (req, res) {
     let sess = req.session;
-    res.render('wx_register', { openid: "595de7bd128fe1005877ef1f" });
+
+    // res.render('wx_register', { openid: "595de7bd128fe1005877ef1f"});
+
+    // return;
     //if (typeof (sess.objid) == "undefined") {
     let code = req.query.code;
     let state = req.query.state;
@@ -22,7 +67,6 @@ router.get('/', function (req, res) {
                     let query = new AV.Query('WxUser');
                     query.equalTo('openid', openid);
                     query.count().then(function (count) {
-
                         if (count == 0) {
                             let wxuser = new WxUser();
                             wxuser.set('openid', openid);

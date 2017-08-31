@@ -52,74 +52,42 @@
     <link rel="stylesheet" href="https://res.wx.qq.com/open/libs/weui/1.1.0/weui.min.css">
     <script type="text/javascript" src="https://res.wx.qq.com/open/libs/weuijs/1.1.1/weui.min.js"></script>
     <script type="text/javascript">
-        $('#cascadePickerBtn').on("click", function () {
-            weui.picker([
-                {
-                    label: '飞机票',
-                    value: 0,
-                    children: [
-                        {
-                            label: '经济舱',
-                            value: 1
+        $(document).ready(function () {
+            var arr;
+            $.getJSON("/wx/company", function (result) {
+                arr=result;
+            });
+            $('#cascadePickerBtn').on("click", function () {
+                weui.picker(arr.data, {
+                        className: 'custom-classname',
+                        defaultValue: [2, 1],
+                        onChange: function (result) {
+                            //console.log(result)
                         },
-                        {
-                            label: '商务舱',
-                            value: 2
-                        }
-                    ]
-                },
-                {
-                    label: '火车票',
-                    value: 1,
-                    children: [
-                        {
-                            label: '卧铺',
-                            value: 1,
-                            disabled: true // 不可用
+                        onConfirm: function (result) {
+                            $('#company').attr('data-flag',1);
+                            $('#company').attr('data-name',result[1].value);
+                            $('#cascadePickerBtn').html(result[1].label);
                         },
-                        {
-                            label: '坐票',
-                            value: 2
-                        },
-                        {
-                            label: '站票',
-                            value: 3
-                        }
-                    ]
-                },
-                {
-                    label: '汽车票',
-                    value: 3,
-                    children: [
-                        {
-                            label: '快班',
-                            value: 1
-                        },
-                        {
-                            label: '普通',
-                            value: 2
-                        }
-                    ]
+                        id: 'doubleLinePicker'
+                    });
+            });
+            $('#formSubmitBtn').on("click", function () {
+                if($('#company').attr('data-flag')!=1){
+                    weui.alert("请选择公司");
+                    return;
                 }
-            ], {
-                    className: 'custom-classname',
-                    defaultValue: [1, 3],
-                    onChange: function (result) {
-                        console.log(result)
-                    },
-                    onConfirm: function (result) {
-                        $('#company').attr('data-name',result[1].value);
-                    },
-                    id: 'doubleLinePicker'
+                if($('#phone').val()==""||$('#name').val()==""){
+                    weui.alert("请正确填写");
+                    return;
+                }
+                $.post("/wx/register", { openid: "<%=openid%>", phone: $('#phone').val(), name: $('#name').val(), company: $('#company').attr('data-name') }, function (result) {
+                    if (result.error == "0") {
+                        window.location.replace("wx/success");
+                    } else {
+                        weui.alert(result.msg);
+                    }
                 });
-        });
-        $('#formSubmitBtn').on("click", function () {
-            $.post("/wx/register", { openid: "<%=openid%>", phone: $('#phone').val(), name: $('#name').val(), company: $('#company').attr('data-name') }, function (result) {
-                if (result.error == "0") {
-                    window.location.replace("wx/success");
-                } else {
-                    weui.alert(result.msg);
-                }
             });
         });
     </script>
