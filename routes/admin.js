@@ -6,6 +6,7 @@ var Todo = AV.Object.extend('Todo');
 
 router.get('/', function (req, res) {
     if (req.currentUser) {
+        console.log(req.currentUser.get('username'));
         res.render('index');
     } else {
         res.redirect('../login');

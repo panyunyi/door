@@ -76,7 +76,7 @@ router.post('/company/add', function (req, res) {
     let arr = req.body;
     let company = new Company();
     company.set('name', arr['data[0][name]']);
-    company.set('floor', arr['data[0][floor]'] ? arr['data[0][floor]'] * 1 : 0);
+    company.set('floor', arr['data[0][floor]'] * 1);
     company.set('number', arr['data[0][number]']);
     company.set('connecter', arr['data[0][connecter]']);
     company.set('phone', arr['data[0][phone]']);
@@ -96,7 +96,7 @@ router.put('/company/edit/:id', function (req, res) {
     let id = req.params.id;
     let company = AV.Object.createWithoutData('Company', id);
     company.set('name', arr['data[' + id + '][name]']);
-    company.set('floor', arr['data[' + id + '][floor]'] ? arr['data[' + id + '][floor]'] * 1 : 0);
+    company.set('floor', arr['data[' + id + '][floor]'] * 1 );
     company.set('number', arr['data[' + id + '][number]']);
     company.set('connecter', arr['data[' + id + '][connecter]']);
     company.set('phone', arr['data[' + id + '][phone]']);
@@ -465,6 +465,9 @@ router.delete('/employee/remove/:id', function (req, res) {
     emp.set('isDel', true);
     emp.save().then(function () {
         emp.fetch().then(function () {
+            let user=emp.get('user')
+            user.set('flag',-1);
+            user.save();
             let query = new AV.Query('UserDoorMap');
             query.equalTo('user', emp.get('user'));
             query.find().then(function (results) {
@@ -492,6 +495,8 @@ router.get('/employee/apply', function (req, res) {
                 result.set('floor', result.get('company') ? result.get('company').get('floor') : "");
                 result.set('companyId', result.get('company') ? result.get('company').id : "");
                 result.set('company', result.get('company') ? result.get('company').get('name') : "");
+                let time = new moment(result.get('updatedAt'));
+                result.set('time', time.format('YYYY-MM-DD HH:mm:ss'));
                 callback1(null, result);
             }, function (err, emps) {
                 resdata["data"] = emps;
@@ -504,6 +509,7 @@ router.get('/employee/apply', function (req, res) {
     function promise2(callback) {
         let query = new AV.Query('Door');
         query.equalTo('isDel', false);
+        query.descending('number');
         query.find().then(function (results) {
             async.map(results, function (result, callback1) {
                 result.set('label', result.get('name'));
@@ -538,88 +544,86 @@ router.get('/employee/apply', function (req, res) {
             promise3(callback);
         }
     ], function (err, results) {
-        resdata["options"] = Object.assign({ "userdoormap": results[1],"companyId":results[2] });
+        resdata["options"] = Object.assign({ "door": results[1],"companyId":results[2] });
         res.jsonp(resdata);
     });
 });
 
 var Employee = AV.Object.extend('Employee');
+// router.put('/employee/apply/edit/:id', function (req, res) {
+//     let arr = req.body;
+//     let id = req.params.id;
+//     let user = AV.Object.createWithoutData('WxUser', id);
+//     let company = AV.Object.createWithoutData('Company', arr['data[' + id + '][companyId]']);
+//     let emp = new Employee();
+//     emp.set('company', company);
+//     emp.set('user', user);
+//     emp.set('isDel', false);
+//     user.set('flag', 1);
+//     user.save();
+//     emp.save();
+//     let cdmQuery=new AV.Query('CompanyDoorMap');
+//     cdmQuery.equalTo('isDel',false);
+//     cdmQuery.equalTo('company',company);
+//     cdmQuery.find().then(function(results){
+//         async.map(results,function(result,callback){
+//             let userdoormap = new UserDoorMap();
+//             userdoormap.set('isDel', false);
+//             userdoormap.set('start', new Date(2011, 1, 1));
+//             userdoormap.set('day', new Date(2099, 11, 30));
+//             userdoormap.set('user', user);
+//             userdoormap.set('door', result.get('door'));
+//             callback(null, userdoormap);
+//         },function(err,doors){
+//             AV.Object.saveAll(doors);
+//             res.jsonp({ "data": [] });
+//         });
+//     });
+// });
 router.put('/employee/apply/edit/:id', function (req, res) {
     let arr = req.body;
     let id = req.params.id;
+    let doorarr = arr['data[' + id + '][door][]'];
     let user = AV.Object.createWithoutData('WxUser', id);
     let company = AV.Object.createWithoutData('Company', arr['data[' + id + '][companyId]']);
-    let emp = new Employee();
-    emp.set('company', company);
-    emp.set('user', user);
-    emp.set('isDel', false);
-    user.set('flag', 1);
-    user.save();
-    emp.save();
-    let cdmQuery=new AV.Query('CompanyDoorMap');
-    cdmQuery.equalTo('isDel',false);
-    cdmQuery.equalTo('company',company);
-    cdmQuery.find().then(function(results){
-        async.map(results,function(result,callback){
+    if (typeof (company) != "undefined") {
+        let emp = new Employee();
+        emp.set('company', company);
+        emp.set('user', user);
+        emp.set('isDel', false);
+        user.set('flag', 1);
+        user.save();
+        emp.save();
+        console.log(doorarr);
+        if (typeof (doorarr) == "string") {
+            let door = AV.Object.createWithoutData('Door', doorarr);
             let userdoormap = new UserDoorMap();
             userdoormap.set('isDel', false);
             userdoormap.set('start', new Date(2011, 1, 1));
             userdoormap.set('day', new Date(2099, 11, 30));
             userdoormap.set('user', user);
-            userdoormap.set('door', result.get('door'));
-            callback(null, userdoormap);
-        },function(err,doors){
-            AV.Object.saveAll(doors);
+            userdoormap.set('door', door);
+            userdoormap.save();
             res.jsonp({ "data": [] });
-        });
-    });
+        } else {
+            async.map(doorarr, function (one, callback) {
+                let door = AV.Object.createWithoutData('Door', one);
+                let userdoormap = new UserDoorMap();
+                userdoormap.set('isDel', false);
+                userdoormap.set('start', new Date(2011, 1, 1));
+                userdoormap.set('day', new Date(2099, 11, 30));
+                userdoormap.set('user', user);
+                userdoormap.set('door', door);
+                callback(null, userdoormap);
+            }, function (err, doors) {
+                AV.Object.saveAll(doors);
+                res.jsonp({ "data": [] });
+            });
+        }
+    } else {
+        return res.jsonp({ "data": [], "fieldErrors": [{ "name": "company", "status": arr['data[' + id + '][company]'] + "未找到" }] });
+    }
 });
-// router.put('/employee/apply/edit/:id', function (req, res) {
-//     let arr = req.body;
-//     let id = req.params.id;
-//     let doorarr = arr['data[' + id + '][userdoormap][]'];
-//     let user = AV.Object.createWithoutData('WxUser', id);
-//     let companyQuery = new AV.Query('Company');
-//     companyQuery.equalTo('number', arr['data[' + id + '][door]']);
-//     companyQuery.first().then(function (company) {
-//         if (typeof (company) != "undefined") {
-//             let emp = new Employee();
-//             emp.set('company', company);
-//             emp.set('user', user);
-//             emp.set('isDel', false);
-//             user.set('flag', 1);
-//             user.save();
-//             emp.save();
-//             if (typeof (doorarr) == "string") {
-//                 let door = AV.Object.createWithoutData('Door', doorarr);
-//                 let userdoormap = new UserDoorMap();
-//                 userdoormap.set('isDel', false);
-//                 userdoormap.set('start', new Date(2011, 1, 1));
-//                 userdoormap.set('day', new Date(2099, 11, 30));
-//                 userdoormap.set('user', user);
-//                 userdoormap.set('door', door);
-//                 userdoormap.save();
-//                 res.jsonp({ "data": [] });
-//             } else {
-//                 async.map(doorarr, function (one, callback) {
-//                     let door = AV.Object.createWithoutData('Door', one);
-//                     let userdoormap = new UserDoorMap();
-//                     userdoormap.set('isDel', false);
-//                     userdoormap.set('start', new Date(2011, 1, 1));
-//                     userdoormap.set('day', new Date(2099, 11, 30));
-//                     userdoormap.set('user', user);
-//                     userdoormap.set('door', door);
-//                     callback(null, userdoormap);
-//                 }, function (err, doors) {
-//                     AV.Object.saveAll(doors);
-//                     res.jsonp({ "data": [] });
-//                 });
-//             }
-//         } else {
-//             return res.jsonp({ "data": [], "fieldErrors": [{ "name": "door", "status": arr['data[' + id + '][door]'] + "门牌号未找到存在" }] });
-//         }
-//     });
-// });
 
 router.delete('/employee/apply/remove/:id', function (req, res) {
     let id = req.params.id;
@@ -664,7 +668,7 @@ router.get('/visitor', function (req, res) {
             result.set('phone', result.get('user').get('phone'));
             //result.set('number', result.get('company').get('number'));
             let time = new moment(result.get('day'));
-            result.set('day', time.format('LL'));
+            result.set('day', time.format('LLL'));
             result.set('target', result.get('target'));
             result.set('pass', result.get('pass') == 1 ? "通过" : "未通过");
             result.set('interviewee', result.get('interviewee').get('name'));

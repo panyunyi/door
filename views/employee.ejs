@@ -50,6 +50,7 @@
                                                 <th>楼层</th>
                                                 <th>姓名</th>
                                                 <th>电话</th>
+                                                <th>申请时间</th>
                                             </tr>
                                         </thead>
                                     </table>
@@ -145,7 +146,6 @@
                     { label: '公司名称', name: 'company', type: 'select' },
                     { label: '姓名', name: 'name' },
                     { label: '电话', name: 'phone' }
-
                 ], i18n: {
                     edit: {
                         button: "编辑",
@@ -285,13 +285,13 @@
                 },
                 table: "#table1",
                 fields: [
-                    {type:'hidden',name:'companyId'},
+                    { type: 'hidden', name: 'companyId' },
                     { label: '公司名称', name: 'company', type: 'readonly' },
                     { label: '楼层', name: 'floor', type: 'readonly' },
                     { label: '姓名', name: 'name', type: 'readonly' },
                     { label: '电话', name: 'phone', type: 'readonly' },
                     { label: '微信昵称', name: 'nickname', type: 'readonly' },
-                    { label: '门禁权限', name: 'companydoormap', type: 'readonly' }
+                    { label: '门禁权限', name: 'door', type: 'checkbox', className: 'list' }
                 ], i18n: {
                     edit: {
                         button: "审核",
@@ -330,15 +330,15 @@
                     { "data": "company" },
                     { "data": "floor" },
                     { "data": "name" },
-                    { "data": "phone" }
-
+                    { "data": "phone" },
+                    { "data": "time" }
                 ],
                 select: true,
                 buttons: [
                     { extend: "edit", editor: editor1 },
                     { extend: "remove", editor: editor1 }
                 ],
-                "order": [[2, 'asc']],
+                "order": [[5, 'desc']],
                 "language": {
                     "url": "../vendor/zh_CN.txt"
                 }
@@ -351,8 +351,18 @@
                     cell.innerHTML = i + 1;
                 });
             }).draw();
+
+            function defaultCheck() {
+
+            }
         });
     </script>
+    <style>
+        .list .eight {
+            height: 350px;
+            overflow-y: scroll;
+        }
+    </style>
     </body>
 
     </html>
