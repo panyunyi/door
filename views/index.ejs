@@ -125,5 +125,9 @@
     <!-- Custom Theme JavaScript -->
     <script src="../dist/js/sb-admin-2.js"></script>
     </body>
-
+    <script>
+            if(!<%=flag%>){
+                $('#index1').css('display','none'); 
+            }
+        </script>
     </html>

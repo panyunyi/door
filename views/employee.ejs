@@ -122,6 +122,10 @@
     <script>
         var editor;
         $(document).ready(function () {
+            if(!<%=flag%>){
+                $('#index1').css('display','none'); 
+            }
+
             $('#user1').on('click', function () {
                 $('#row2').css('display', 'block');
                 table.ajax.reload();
@@ -255,7 +259,7 @@
                 select: true,
                 buttons: [
                     { extend: "create", editor: editor2 },
-                    { extend: "edit", editor: editor2 },
+                    
                     { extend: "remove", editor: editor2 }
                 ],
                 "order": [[3, 'asc']],

@@ -80,6 +80,9 @@
     <script>
         var editor;
         $(document).ready(function () {
+            if(!<%=flag%>){
+                $('#index1').css('display','none'); 
+            }
             var table = $('#table').DataTable({
                 "processing": true,
                 stateSave: true,

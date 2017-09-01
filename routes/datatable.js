@@ -594,7 +594,6 @@ router.put('/employee/apply/edit/:id', function (req, res) {
         user.set('flag', 1);
         user.save();
         emp.save();
-        console.log(doorarr);
         if (typeof (doorarr) == "string") {
             let door = AV.Object.createWithoutData('Door', doorarr);
             let userdoormap = new UserDoorMap();

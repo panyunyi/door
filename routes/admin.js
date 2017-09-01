@@ -6,8 +6,11 @@ var Todo = AV.Object.extend('Todo');
 
 router.get('/', function (req, res) {
     if (req.currentUser) {
-        console.log(req.currentUser.get('username'));
-        res.render('index');
+        let flag = 0;
+        if (req.currentUser.get('username') == "admin") {
+            flag = 1;
+        }
+        res.render('index', { flag: flag });
     } else {
         res.redirect('../login');
     }
@@ -15,7 +18,11 @@ router.get('/', function (req, res) {
 
 router.get('/company', function (req, res) {
     if (req.currentUser) {
-        res.render('company');
+        let flag = 0;
+        if (req.currentUser.get('username') == "admin") {
+            flag = 1;
+        }
+        res.render('company', { flag: flag });
     } else {
         res.redirect('../login');
     }
@@ -23,7 +30,11 @@ router.get('/company', function (req, res) {
 
 router.get('/door', function (req, res) {
     if (req.currentUser) {
-        res.render('door');
+        let flag = 0;
+        if (req.currentUser.get('username') == "admin") {
+            flag = 1;
+        }
+        res.render('door', { flag: flag });
     } else {
         res.redirect('../login');
     }
@@ -31,7 +42,11 @@ router.get('/door', function (req, res) {
 
 router.get('/employee', function (req, res) {
     if (req.currentUser) {
-        res.render('employee');
+        let flag = 0;
+        if (req.currentUser.get('username') == "admin") {
+            flag = 1;
+        }
+        res.render('employee', { flag: flag });
     } else {
         res.redirect('../login');
     }
@@ -39,7 +54,11 @@ router.get('/employee', function (req, res) {
 
 router.get('/visitor', function (req, res) {
     if (req.currentUser) {
-        res.render('visitor');
+        let flag = 0;
+        if (req.currentUser.get('username') == "admin") {
+            flag = 1;
+        }
+        res.render('visitor', { flag: flag });
     } else {
         res.redirect('../login');
     }
@@ -47,7 +66,11 @@ router.get('/visitor', function (req, res) {
 
 router.get('/history', function (req, res) {
     if (req.currentUser) {
-        res.render('history');
+        let flag = 0;
+        if (req.currentUser.get('username') == "admin") {
+            flag = 1;
+        }
+        res.render('history', { flag: flag });
     } else {
         res.redirect('../login');
     }
