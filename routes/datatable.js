@@ -8,6 +8,7 @@ moment.locale('zh-cn');
 router.get('/company', function (req, res) {
     let query = new AV.Query('Company');
     query.equalTo('isDel', false);
+    query.limit(1000);
     query.find().then(function (results) {
         async.map(results, function (result, callback) {
             result.set('DT_RowId', result.id);
@@ -49,6 +50,7 @@ router.get('/companydoormap/:id', function (req, res) {
         let query = new AV.Query('Door');
         query.equalTo('isDel', false);
         query.ascending('number');
+        query.limit(1000);
         query.find().then(function (results) {
             async.map(results, function (result, callback1) {
                 result.set('label', result.get('name'));
@@ -187,6 +189,7 @@ router.delete('/companydoormap/remove/:id', function (req, res) {
 router.get('/door', function (req, res) {
     let query = new AV.Query('Door');
     query.equalTo('isDel', false);
+    query.limit(1000);
     query.find().then(function (results) {
         async.map(results, function (result, callback) {
             result.set('DT_RowId', result.id);
@@ -273,6 +276,7 @@ router.get('/userdoormap/:id', function (req, res) {
         let query = new AV.Query('Door');
         query.equalTo('isDel', false);
         query.ascending('number');
+        query.limit(1000);
         query.find().then(function (results) {
             async.map(results, function (result, callback1) {
                 result.set('label', result.get('name'));
@@ -366,6 +370,7 @@ router.get('/employee', function (req, res) {
     function promise1(callback) {
         let query = new AV.Query('Employee');
         query.equalTo('isDel', false);
+        query.limit(1000);
         query.include('company');
         query.include('user');
         query.find().then(function (results) {
@@ -401,6 +406,7 @@ router.get('/employee', function (req, res) {
     // }
     function promise3(callback) {
         let query = new AV.Query('Company');
+        query.limit(1000);
         query.equalTo('isDel', false);
         query.find().then(function (results) {
             async.map(results, function (result, callback1) {
@@ -488,6 +494,7 @@ router.get('/employee/apply', function (req, res) {
     function promise1(callback) {
         let query = new AV.Query('WxUser');
         query.equalTo('flag', 0);
+        query.limit(1000);
         query.include('company');
         query.find().then(function (results) {
             async.map(results, function (result, callback1) {
@@ -510,6 +517,7 @@ router.get('/employee/apply', function (req, res) {
         let query = new AV.Query('Door');
         query.equalTo('isDel', false);
         query.descending('number');
+        query.limit(1000);
         query.find().then(function (results) {
             async.map(results, function (result, callback1) {
                 result.set('label', result.get('name'));
@@ -523,6 +531,7 @@ router.get('/employee/apply', function (req, res) {
     function promise3(callback){
         let query=new AV.Query('Company');
         query.equalTo('isDel', false);
+        query.limit(1000);
         query.find().then(function (results) {
             async.map(results, function (result, callback1) {
                 result.set('label', result.get('name'));
@@ -637,6 +646,7 @@ router.get('/history', function (req, res) {
     let query = new AV.Query('History');
     query.include('user');
     query.include('door');
+    query.limit(1000);
     query.find().then(function (results) {
         async.map(results, function (result, callback) {
             result.set('DT_RowId', result.id);
@@ -660,6 +670,7 @@ router.get('/visitor', function (req, res) {
     query.include('user');
     query.include('company');
     query.include('interviewee');
+    query.limit(1000);
     query.find().then(function (results) {
         async.map(results, function (result, callback) {
             result.set('DT_RowId', result.id);
