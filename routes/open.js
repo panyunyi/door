@@ -5,6 +5,7 @@ var request = require('request-json');
 var appid = process.env.wx_appid;
 var secret = process.env.wx_secret;
 var History = AV.Object.extend('History');
+var Log = AV.Object.extend('Log');
 
 router.get('/', function (req, res) {
     let sess = req.session;
@@ -52,7 +53,12 @@ router.get('/', function (req, res) {
                             });
                         });
                     } else {
-                        res.send("用户信息有重复，请联系管理员。");
+                        let log=new Log();
+                        log.set('openid',openid);
+                        log.set('log','openid重复');
+                        log.save().then(function(){
+                            res.send("用户信息有重复，请联系管理员。");
+                        });
                     }
                 });
             } else {
