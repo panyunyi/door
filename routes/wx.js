@@ -128,22 +128,24 @@ router.post('/register', function (req, res) {
     let query = new AV.Query('WxUser');
     query.equalTo('openid', openid);
     query.first().then(function (data) {
-        let user = new WxUser();
-        user.set('name', req.body.name);
-        user.set('flag', 0);
-        user.set('phone', req.body.phone);
-        user.set('company', company);
         if (typeof (data) == "undefined") {
+            let user = new WxUser();
+            user.set('name', req.body.name);
+            user.set('flag', 0);
+            user.set('phone', req.body.phone);
+            user.set('company', company);
             user.set('openid', openid);
-            user.save();
-            res.send({ error: 0, msg: "" });
+            user.save().then(function(){
+                res.send({ error: 0, msg: "" });
+            });
         } else {
             data.set('company', company);
             data.set('name', req.body.name);
             data.set('flag', 0);
             data.set('phone', req.body.phone);
-            data.save();
-            res.send({ error: 0, msg: "" });
+            data.save().then(function(){
+                res.send({ error: 0, msg: "" });
+            });
         }
     });
 });
