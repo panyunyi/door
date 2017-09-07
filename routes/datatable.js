@@ -2,8 +2,22 @@
 var router = require('express').Router();
 var AV = require('leanengine');
 var async = require('async');
+var request = require('request-json');
+var appid = process.env.wx_appid;
+var secret = process.env.wx_secret;
 var moment = require('moment');
 moment.locale('zh-cn');
+
+function getTokenAndSendMsg(data) {
+    let client = request.createClient('https://api.weixin.qq.com/cgi-bin/');
+    client.get('token?grant_type=client_credential&appid=' + appid + '&secret=' + secret, function (err, res, body) {
+        let token = body.access_token;
+        client = request.createClient('https://api.weixin.qq.com/cgi-bin/message/template/');
+        client.post('send?access_token=' + token, data, function (err, res, body) {
+            console.log(body);
+        });
+    });
+}
 
 router.get('/company', function (req, res) {
     let query = new AV.Query('Company');
@@ -98,7 +112,7 @@ router.put('/company/edit/:id', function (req, res) {
     let id = req.params.id;
     let company = AV.Object.createWithoutData('Company', id);
     company.set('name', arr['data[' + id + '][name]']);
-    company.set('floor', arr['data[' + id + '][floor]'] * 1 );
+    company.set('floor', arr['data[' + id + '][floor]'] * 1);
     company.set('number', arr['data[' + id + '][number]']);
     company.set('connecter', arr['data[' + id + '][connecter]']);
     company.set('phone', arr['data[' + id + '][phone]']);
@@ -471,8 +485,8 @@ router.delete('/employee/remove/:id', function (req, res) {
     emp.set('isDel', true);
     emp.save().then(function () {
         emp.fetch().then(function () {
-            let user=emp.get('user')
-            user.set('flag',-1);
+            let user = emp.get('user')
+            user.set('flag', -1);
             user.save();
             let query = new AV.Query('UserDoorMap');
             query.equalTo('user', emp.get('user'));
@@ -528,8 +542,8 @@ router.get('/employee/apply', function (req, res) {
             });
         });
     }
-    function promise3(callback){
-        let query=new AV.Query('Company');
+    function promise3(callback) {
+        let query = new AV.Query('Company');
         query.equalTo('isDel', false);
         query.limit(1000);
         query.find().then(function (results) {
@@ -553,7 +567,7 @@ router.get('/employee/apply', function (req, res) {
             promise3(callback);
         }
     ], function (err, results) {
-        resdata["options"] = Object.assign({ "door": results[1],"companyId":results[2] });
+        resdata["options"] = Object.assign({ "door": results[1], "companyId": results[2] });
         res.jsonp(resdata);
     });
 });
@@ -600,34 +614,66 @@ router.put('/employee/apply/edit/:id', function (req, res) {
         emp.set('company', company);
         emp.set('user', user);
         emp.set('isDel', false);
-        user.set('flag', 1);
-        user.save();
         emp.save();
-        if (typeof (doorarr) == "string") {
-            let door = AV.Object.createWithoutData('Door', doorarr);
-            let userdoormap = new UserDoorMap();
-            userdoormap.set('isDel', false);
-            userdoormap.set('start', new Date(2011, 1, 1));
-            userdoormap.set('day', new Date(2099, 11, 30));
-            userdoormap.set('user', user);
-            userdoormap.set('door', door);
-            userdoormap.save();
-            res.jsonp({ "data": [] });
-        } else {
-            async.map(doorarr, function (one, callback) {
-                let door = AV.Object.createWithoutData('Door', one);
-                let userdoormap = new UserDoorMap();
-                userdoormap.set('isDel', false);
-                userdoormap.set('start', new Date(2011, 1, 1));
-                userdoormap.set('day', new Date(2099, 11, 30));
-                userdoormap.set('user', user);
-                userdoormap.set('door', door);
-                callback(null, userdoormap);
-            }, function (err, doors) {
-                AV.Object.saveAll(doors);
-                res.jsonp({ "data": [] });
+        user.fetch().then(function () {
+            let audittime = new moment();
+            let data = {
+                touser: user.get('openid'), template_id: "VD8s8nNPftYihxT6h6Rt4oDVdibu3o7Cml7nwhvDCK4", url: '', "data": {
+                    "first": {
+                        "value": "您好，您的资料已经通过审核并已分配门禁权限。",
+                        "color": "#44b549"
+                    },
+                    "keyword1": {
+                        "value": user.get('name'),
+                        "color": "#222"
+                    },
+                    "keyword2": {
+                        "value": user.get('phone'),
+                        "color": "#222"
+                    },
+                    "keyword3": {
+                        "value": audittime.format('LLLL'),
+                        "color": "#222"
+                    },
+                    "remark": {
+                        "value": "汇金大厦欢迎您的入驻。",
+                        "color": "#222"
+                    }
+                }
+            };
+            user.set('flag', 1);
+            user.save().then(function(){
+                if (typeof (doorarr) == "string") {
+                    let door = AV.Object.createWithoutData('Door', doorarr);
+                    let userdoormap = new UserDoorMap();
+                    userdoormap.set('isDel', false);
+                    userdoormap.set('start', new Date(2011, 1, 1));
+                    userdoormap.set('day', new Date(2099, 11, 30));
+                    userdoormap.set('user', user);
+                    userdoormap.set('door', door);
+                    userdoormap.save().then(function(){
+                        getTokenAndSendMsg(data);
+                        res.jsonp({ "data": [] });
+                    });
+                } else {
+                    async.map(doorarr, function (one, callback) {
+                        let door = AV.Object.createWithoutData('Door', one);
+                        let userdoormap = new UserDoorMap();
+                        userdoormap.set('isDel', false);
+                        userdoormap.set('start', new Date(2011, 1, 1));
+                        userdoormap.set('day', new Date(2099, 11, 30));
+                        userdoormap.set('user', user);
+                        userdoormap.set('door', door);
+                        callback(null, userdoormap);
+                    }, function (err, doors) {
+                        AV.Object.saveAll(doors).then(function(){
+                            getTokenAndSendMsg(data);
+                            res.jsonp({ "data": [] });
+                        });
+                    });
+                }
             });
-        }
+        });
     } else {
         return res.jsonp({ "data": [], "fieldErrors": [{ "name": "company", "status": arr['data[' + id + '][company]'] + "未找到" }] });
     }
@@ -636,9 +682,37 @@ router.put('/employee/apply/edit/:id', function (req, res) {
 router.delete('/employee/apply/remove/:id', function (req, res) {
     let id = req.params.id;
     let user = AV.Object.createWithoutData('WxUser', id);
-    user.set('flag', -1);
-    user.save().then(function () {
-        res.jsonp({ "data": [] });
+    user.fetch().then(function () {
+        let audittime = new moment();
+        let data = {
+            touser: user.get('openid'), template_id: "VD8s8nNPftYihxT6h6Rt4oDVdibu3o7Cml7nwhvDCK4", url: 'http://clouddoor.leanapp.cn/menu', "data": {
+                "first": {
+                    "value": "您好，您的资料未通过审核请重新填写信息。",
+                    "color": "#44b549"
+                },
+                "keyword1": {
+                    "value": user.get('name'),
+                    "color": "#222"
+                },
+                "keyword2": {
+                    "value": user.get('phone'),
+                    "color": "#222"
+                },
+                "keyword3": {
+                    "value": audittime.format('LLLL'),
+                    "color": "#222"
+                },
+                "remark": {
+                    "value": "点击前往注册。",
+                    "color": "#222"
+                }
+            }
+        };
+        getTokenAndSendMsg(data);
+        user.set('flag', -1);
+        user.save().then(function () {
+            res.jsonp({ "data": [] });
+        });
     });
 });
 
