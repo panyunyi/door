@@ -10,51 +10,50 @@ router.get('/', function (req, res) {
     let sess = req.session;
     //sess.objid = "591323571b69e600686e6089";
     //if (typeof (sess.objid) == "undefined") {
-        let code = req.query.code;
-        let state = req.query.state;
-        let client = request.createClient('https://api.weixin.qq.com/sns/oauth2/');
-        client.get('access_token?appid=' + appid + '&secret=' + secret + '&code=' + code + '&grant_type=authorization_code', function (err, res1, body) {
-            if (body != "undefined" && typeof (body.openid) != "undefined") {
-                client = request.createClient('https://api.weixin.qq.com/sns/');
-                client.get('userinfo?access_token=' + body.access_token + '&openid=' + body.openid + '&lang=zh_CN', function (err2, res2, body2) {
-                    if (body2 != "undefined" && typeof (body2.openid) != "undefined") {
-                        let openid = body2.openid;
-                        let query = new AV.Query('WxUser');
-                        query.equalTo('openid', openid);
-                        query.count().then(function (count) {
-                            if (count == 0) {
-                                let wxuser = new WxUser();
-                                wxuser.set('openid', openid);
-                                wxuser.set('nickname', body2.nickname);
-                                wxuser.set('sex', body2.sex == 1 ? "男" : "女");
-                                wxuser.set('city', body2.city);
-                                wxuser.set('province', body2.province);
-                                wxuser.set('country', body2.country);
-                                wxuser.set('headimgurl', body2.headimgurl);
-                                wxuser.set('flag', -1);
-                                wxuser.save().then(function (data) {
-                                    sess.objidid = data.id;
-                                    res.render('visit', { openid: openid });
-                                }, function (err) {
-                                    console.log(err);
-                                });
-                            } else if (count == 1) {
-                                query.first().then(function (data) {
-                                    sess.objid = data.id;
-                                    res.render('visit', { openid: openid });
-                                });
-                            } else {
-                                res.send("用户信息有重复，请联系管理员。");
-                            }
-                        });
-                    } else {
-                        res.send("已超时，请退出菜单重进。");
-                    }
-                });
-            } else {
-                res.send("已超时，请退出菜单重进。");
-            }
-        });
+    let code = req.query.code;
+    let state = req.query.state;
+    let client = request.createClient('https://api.weixin.qq.com/sns/oauth2/');
+    client.get('access_token?appid=' + appid + '&secret=' + secret + '&code=' + code + '&grant_type=authorization_code', function (err, res1, body) {
+        if (body != "undefined" && typeof (body.openid) != "undefined") {
+            client = request.createClient('https://api.weixin.qq.com/sns/');
+            client.get('userinfo?access_token=' + body.access_token + '&openid=' + body.openid + '&lang=zh_CN', function (err2, res2, body2) {
+                if (body2 != "undefined" && typeof (body2.openid) != "undefined") {
+                    let openid = body2.openid;
+                    let query = new AV.Query('WxUser');
+                    query.equalTo('openid', openid);
+                    query.count().then(function (count) {
+                        if (count == 0) {
+                            let wxuser = new WxUser();
+                            wxuser.set('openid', openid);
+                            wxuser.set('nickname', body2.nickname);
+                            wxuser.set('sex', body2.sex == 1 ? "男" : "女");
+                            wxuser.set('city', body2.city);
+                            wxuser.set('province', body2.province);
+                            wxuser.set('country', body2.country);
+                            wxuser.set('headimgurl', body2.headimgurl);
+                            wxuser.save().then(function (data) {
+                                sess.objidid = data.id;
+                                res.render('visit', { openid: openid });
+                            }, function (err) {
+                                console.log(err);
+                            });
+                        } else if (count == 1) {
+                            query.first().then(function (data) {
+                                sess.objid = data.id;
+                                res.render('visit', { openid: openid });
+                            });
+                        } else {
+                            res.send("用户信息有重复，请联系管理员。");
+                        }
+                    });
+                } else {
+                    res.send("已超时，请退出菜单重进。");
+                }
+            });
+        } else {
+            res.send("已超时，请退出菜单重进。");
+        }
+    });
     // } else {
     //     let user = AV.Object.createWithoutData('WxUser', sess.objid);
     //     user.fetch().then(function () {
@@ -84,6 +83,7 @@ router.post('/apply', function (req, res) {
         if (typeof (user) != "undefined") {
             user.set('name', name);
             user.set('phone', phone);
+            user.set('visit',0);
             user.save();
             let interviewQuery = new AV.Query('WxUser');
             interviewQuery.equalTo('phone', phone2);
@@ -93,45 +93,45 @@ router.post('/apply', function (req, res) {
                     // companyQuery.equalTo('number', door);
                     // companyQuery.first().then(function (company) {
                     //     if (typeof (company) != "undefined") {
-                            let visit = new Visit();
-                            visit.set('target',door);
-                            visit.set('content', content);
-                            visit.set('interviewee', interview);
-                            visit.set('pass', 0);
-                            visit.set('user', user);
-                            visit.set('day', new Date(day[0] * 1, day[1] * 1 - 1, day[2] * 1, time[0] * 1, time[1] * 1, 0));
-                            visit.save().then(function (visit) {
-                                let data = {
-                                    touser: interview.get('openid'), template_id: "0MfPUimCvcbKya-LWH3UfW2vqdPMZgPJKW3XpzUV2DQ", url: 'http://clouddoor.leanapp.cn/audit/' + visit.id, "data": {
-                                        "first": {
-                                            "value": "您有新的访客申请，请审核。",
-                                            "color": "#173177"
-                                        },
-                                        "keyword1": {
-                                            "value": name,
-                                            "color": "#173177"
-                                        },
-                                        "keyword2": {
-                                            "value": content,
-                                            "color": "#173177"
-                                        },
-                                        "keyword3": {
-                                            "value": phone,
-                                            "color": "#173177"
-                                        },
-                                        "keyword4": {
-                                            "value": req.body.day + " " + req.body.time,
-                                            "color": "#173177"
-                                        },
-                                        "remark": {
-                                            "value": "点击进入审核。",
-                                            "color": "#173177"
-                                        }
-                                    }
-                                };
-                                getTokenAndSendMsg(data);
-                                res.send({ error: 0, msg: "" });
-                            });
+                    let visit = new Visit();
+                    visit.set('target', door);
+                    visit.set('content', content);
+                    visit.set('interviewee', interview);
+                    visit.set('pass', 0);
+                    visit.set('user', user);
+                    visit.set('day', new Date(day[0] * 1, day[1] * 1 - 1, day[2] * 1, time[0] * 1, time[1] * 1, 0));
+                    visit.save().then(function (visit) {
+                        let data = {
+                            touser: interview.get('openid'), template_id: "0MfPUimCvcbKya-LWH3UfW2vqdPMZgPJKW3XpzUV2DQ", url: 'http://clouddoor.leanapp.cn/audit/' + visit.id, "data": {
+                                "first": {
+                                    "value": "您有新的访客申请，请审核。",
+                                    "color": "#173177"
+                                },
+                                "keyword1": {
+                                    "value": name,
+                                    "color": "#173177"
+                                },
+                                "keyword2": {
+                                    "value": content,
+                                    "color": "#173177"
+                                },
+                                "keyword3": {
+                                    "value": phone,
+                                    "color": "#173177"
+                                },
+                                "keyword4": {
+                                    "value": req.body.day + " " + req.body.time,
+                                    "color": "#173177"
+                                },
+                                "remark": {
+                                    "value": "点击进入审核。",
+                                    "color": "#173177"
+                                }
+                            }
+                        };
+                        getTokenAndSendMsg(data);
+                        res.send({ error: 0, msg: "" });
+                    });
                     //     } else {
                     //         res.send({ error: 1, msg: "公司门牌号正确。" });
                     //     }
