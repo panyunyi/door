@@ -17,15 +17,16 @@
                         <!-- /.panel-heading -->
                         <div class="panel-body">
                             <ul class="nav nav-tabs">
-                                <li class="active"><a id="user1" href="#home" data-toggle="tab">已审核用户</a>
+                                    <li class="active"><a id="user2" href="#profile" data-toggle="tab">用户申请审核</a>
+                                    </li>
+                                <li ><a id="user1" href="#home" data-toggle="tab">已审核用户</a>
                                 </li>
-                                <li><a id="user2" href="#profile" data-toggle="tab">用户申请审核</a>
-                                </li>
+                                
                             </ul>
 
                             <!-- Tab panes -->
                             <div class="tab-content">
-                                <div class="tab-pane fade in active" id="home">
+                                <div class="tab-pane fade" id="home">
                                     <br>
                                     <table id="table" class="ui celled table" cellspacing="0" width="100%">
                                         <thead>
@@ -40,7 +41,7 @@
                                         </thead>
                                     </table>
                                 </div>
-                                <div class="tab-pane fade" id="profile">
+                                <div class="tab-pane fade in active" id="profile">
                                     <br>
                                     <table id="table1" class="ui celled table" cellspacing="0" width="100%">
                                         <thead>
@@ -64,7 +65,7 @@
                 </div>
             </div>
             <!-- /.row -->
-            <div id="row2" class="row">
+            <div id="row2" class="row" style="display:none">
                 <div class="col-lg-12">
                     <div class="panel panel-default">
                         <div class="panel-heading">
@@ -356,9 +357,6 @@
                 });
             }).draw();
 
-            function defaultCheck() {
-
-            }
         });
     </script>
     <style>

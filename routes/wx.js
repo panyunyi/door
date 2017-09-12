@@ -30,7 +30,7 @@ function combine(companies, floorArr) {
 
 router.get('/company', function (req, res) {
     let companyQuery = new AV.Query('Company');
-    let floorArr=[];
+    let floorArr = [];
     companyQuery.equalTo('isDel', false);
     companyQuery.ascending('floor');
     companyQuery.find().then(function (companies) {
@@ -129,6 +129,9 @@ router.get('/', function (req, res) {
 router.post('/register', function (req, res) {
     let openid = req.body.openid;
     let company = AV.Object.createWithoutData('Company', req.body.company);
+    if (typeof (company) == "undefined" || req.body.name == "" || req.body.phone == "") {
+        return res.send({ error: 1, msg: "注册信息有误，请正确填写" });
+    }
     let query = new AV.Query('WxUser');
     query.equalTo('openid', openid);
     query.first().then(function (data) {
@@ -139,7 +142,7 @@ router.post('/register', function (req, res) {
             user.set('phone', req.body.phone);
             user.set('company', company);
             user.set('openid', openid);
-            user.save().then(function(){
+            user.save().then(function () {
                 res.send({ error: 0, msg: "" });
             });
         } else {
@@ -147,7 +150,7 @@ router.post('/register', function (req, res) {
             data.set('name', req.body.name);
             data.set('flag', 0);
             data.set('phone', req.body.phone);
-            data.save().then(function(){
+            data.save().then(function () {
                 res.send({ error: 0, msg: "" });
             });
         }
