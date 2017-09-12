@@ -92,13 +92,17 @@ router.get('/', function (req, res) {
                                 } else if (data.get('flag') == 0) {
                                     title = "正在审核";
                                 } else {
-
                                     return res.render('wx_register', { openid: openid });
                                 }
                                 res.render('success', { title: title });
                             });
                         } else {
-                            res.send("用户信息有重复，请联系管理员。");
+                            let log = new Log();
+                            log.set('openid', openid);
+                            log.set('log', 'openid重复');
+                            log.save().then(function () {
+                                res.send("用户信息有重复，请联系管理员。");
+                            });
                         }
                     });
                 } else {
@@ -121,7 +125,7 @@ router.get('/', function (req, res) {
     //     });
     // }
 });
-
+//常驻用户注册
 router.post('/register', function (req, res) {
     let openid = req.body.openid;
     let company = AV.Object.createWithoutData('Company', req.body.company);

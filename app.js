@@ -9,7 +9,6 @@ var cookieSession = require('cookie-session');
 var users = require('./routes/users');
 var admin=require('./routes/admin');
 var datatable=require('./routes/datatable');
-var test=require('./routes/test');
 var visit=require('./routes/visit');
 var audit=require('./routes/audit');
 var menu=require('./routes/menu');
@@ -57,7 +56,6 @@ app.use('/login', users);
 app.use('/admin',admin);
 app.use('/visit',visit);
 app.use('/audit',audit);
-app.use('/test',test);
 app.use('/menu',menu);
 app.use('/api/json',datatable);
 app.use(function(req, res, next) {

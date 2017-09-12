@@ -32,6 +32,7 @@
                                                 <th>被访公司</th>
                                                 <th>被访人</th>
                                                 <th>审核结果</th>
+                                                <th>提交时间</th>
                                             </tr>
                                         </thead>
                                     </table>
@@ -96,10 +97,11 @@
                     { "data": "day" },
                     { "data": "target" },
                     { "data": "interviewee" },
-                    { "data": "pass" }
+                    { "data": "pass" },
+                    { "data": "time" }
                 ],
                 select: true,
-                "order": [[4, 'asc']],
+                "order": [[8, 'desc']],
                 "language": {
                     "url": "../vendor/zh_CN.txt"
                 }

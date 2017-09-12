@@ -7,7 +7,7 @@ var secret = process.env.wx_secret;
 var moment = require('moment');
 moment.locale('zh-cn');
 var async = require('async');
-
+//
 router.get('/:id', function (req, res) {
     let id = req.params.id;
     let query = new AV.Query('Visit');
@@ -28,7 +28,7 @@ router.get('/:id', function (req, res) {
         }
     });
 });
-
+//访客审核
 var UserDoorMap = AV.Object.extend('UserDoorMap');
 router.get('/submit/:number/:id/:openid/:hour', function (req, res) {
     let id = req.params.id;

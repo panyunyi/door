@@ -43,7 +43,12 @@ router.get('/', function (req, res) {
                                 res.render('visit', { openid: openid });
                             });
                         } else {
-                            res.send("用户信息有重复，请联系管理员。");
+                            let log = new Log();
+                            log.set('openid', openid);
+                            log.set('log', 'openid重复');
+                            log.save().then(function () {
+                                res.send("用户信息有重复，请联系管理员。");
+                            });
                         }
                     });
                 } else {
@@ -66,7 +71,7 @@ router.get('/', function (req, res) {
     //     });
     // }
 });
-
+//访客申请
 var Visit = AV.Object.extend('Visit');
 router.post('/apply', function (req, res) {
     let openid = req.body.openid;
@@ -83,7 +88,6 @@ router.post('/apply', function (req, res) {
         if (typeof (user) != "undefined") {
             user.set('name', name);
             user.set('phone', phone);
-            user.set('visit',0);
             user.save();
             let interviewQuery = new AV.Query('WxUser');
             interviewQuery.equalTo('phone', phone2);

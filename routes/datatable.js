@@ -7,7 +7,7 @@ var appid = process.env.wx_appid;
 var secret = process.env.wx_secret;
 var moment = require('moment');
 moment.locale('zh-cn');
-
+//模板消息发送
 function getTokenAndSendMsg(data) {
     let client = request.createClient('https://api.weixin.qq.com/cgi-bin/');
     client.get('token?grant_type=client_credential&appid=' + appid + '&secret=' + secret, function (err, res, body) {
@@ -18,7 +18,7 @@ function getTokenAndSendMsg(data) {
         });
     });
 }
-
+//公司信息表
 router.get('/company', function (req, res) {
     let query = new AV.Query('Company');
     query.equalTo('isDel', false);
@@ -32,7 +32,7 @@ router.get('/company', function (req, res) {
         });
     });
 });
-
+//公司对应的门禁权限（暂时弃用）
 router.get('/companydoormap/:id', function (req, res) {
     let resdata = {};
     let companyarr = [];
@@ -86,7 +86,7 @@ router.get('/companydoormap/:id', function (req, res) {
             res.jsonp(resdata);
         });
 });
-
+//新增公司
 var Company = AV.Object.extend('Company');
 router.post('/company/add', function (req, res) {
     let arr = req.body;
@@ -106,7 +106,7 @@ router.post('/company/add', function (req, res) {
         console.log(error);
     });
 });
-
+//编辑公司
 router.put('/company/edit/:id', function (req, res) {
     let arr = req.body;
     let id = req.params.id;
@@ -126,7 +126,7 @@ router.put('/company/edit/:id', function (req, res) {
         console.log(error);
     });
 });
-
+//删除公司
 router.delete('/company/remove/:id', function (req, res) {
     let id = req.params.id;
     let company = AV.Object.createWithoutData('Company', id);
@@ -135,7 +135,7 @@ router.delete('/company/remove/:id', function (req, res) {
         res.jsonp({ "data": [] });
     });
 });
-
+//新增公司对应的门禁权限（暂时弃用）
 var CompanyDoorMap = AV.Object.extend('CompanyDoorMap');
 router.post('/companydoormap/add', function (req, res) {
     let arr = req.body;
@@ -169,7 +169,7 @@ router.post('/companydoormap/add', function (req, res) {
         }
     });
 });
-
+//修改公司对应的门禁权限（暂时弃用）
 router.put('/companydoormap/edit/:id', function (req, res) {
     let arr = req.body;
     let id = req.params.id;
@@ -190,7 +190,7 @@ router.put('/companydoormap/edit/:id', function (req, res) {
         console.log(error);
     });
 });
-
+//删除公司对应的门禁权限（暂时弃用）
 router.delete('/companydoormap/remove/:id', function (req, res) {
     let id = req.params.id;
     let userdoormap = AV.Object.createWithoutData('CompanyDoorMap', id);
@@ -199,7 +199,7 @@ router.delete('/companydoormap/remove/:id', function (req, res) {
         res.jsonp({ "data": [] });
     });
 });
-
+//门禁信息表
 router.get('/door', function (req, res) {
     let query = new AV.Query('Door');
     query.equalTo('isDel', false);
@@ -213,7 +213,7 @@ router.get('/door', function (req, res) {
         });
     });
 });
-
+//增加门禁
 var Door = AV.Object.extend('Door');
 router.post('/door/add', function (req, res) {
     let arr = req.body;
@@ -231,7 +231,7 @@ router.post('/door/add', function (req, res) {
         console.log(error);
     });
 });
-
+//修改门禁
 router.put('/door/edit/:id', function (req, res) {
     let arr = req.body;
     let id = req.params.id;
@@ -249,7 +249,7 @@ router.put('/door/edit/:id', function (req, res) {
         console.log(error);
     });
 });
-
+//删除门禁
 router.delete('/door/remove/:id', function (req, res) {
     let id = req.params.id;
     let door = AV.Object.createWithoutData('Door', id);
@@ -258,7 +258,7 @@ router.delete('/door/remove/:id', function (req, res) {
         res.jsonp({ "data": [] });
     });
 });
-
+//门禁权限表
 router.get('/userdoormap/:id', function (req, res) {
     let resdata = {};
     let userarr = [];
@@ -312,7 +312,7 @@ router.get('/userdoormap/:id', function (req, res) {
             res.jsonp(resdata);
         });
 });
-
+//增加某个门禁权限
 var UserDoorMap = AV.Object.extend('UserDoorMap');
 router.post('/userdoormap/add', function (req, res) {
     let arr = req.body;
@@ -348,7 +348,7 @@ router.post('/userdoormap/add', function (req, res) {
         }
     });
 });
-
+//修改某个门禁权限
 router.put('/userdoormap/edit/:id', function (req, res) {
     let arr = req.body;
     let id = req.params.id;
@@ -369,7 +369,7 @@ router.put('/userdoormap/edit/:id', function (req, res) {
         console.log(error);
     });
 });
-
+//删除某个门禁权限
 router.delete('/userdoormap/remove/:id', function (req, res) {
     let id = req.params.id;
     let userdoormap = AV.Object.createWithoutData('UserDoorMap', id);
@@ -378,7 +378,7 @@ router.delete('/userdoormap/remove/:id', function (req, res) {
         res.jsonp({ "data": [] });
     });
 });
-
+//用户信息
 router.get('/employee', function (req, res) {
     let resdata = {};
     function promise1(callback) {
@@ -446,7 +446,7 @@ router.get('/employee', function (req, res) {
             res.jsonp(resdata);
         });
 });
-
+//修改用户信息
 router.put('/employee/edit/:id', function (req, res) {
     let arr = req.body;
     let id = req.params.id;
@@ -478,7 +478,7 @@ router.put('/employee/edit/:id', function (req, res) {
         });
     });
 });
-
+//删除用户及相应权限
 router.delete('/employee/remove/:id', function (req, res) {
     let id = req.params.id;
     let emp = AV.Object.createWithoutData('Employee', id);
@@ -502,7 +502,7 @@ router.delete('/employee/remove/:id', function (req, res) {
         });
     });
 });
-
+//常驻用户申请
 router.get('/employee/apply', function (req, res) {
     let resdata = {};
     function promise1(callback) {
@@ -603,6 +603,8 @@ var Employee = AV.Object.extend('Employee');
 //         });
 //     });
 // });
+
+//审核申请
 router.put('/employee/apply/edit/:id', function (req, res) {
     let arr = req.body;
     let id = req.params.id;
@@ -678,7 +680,7 @@ router.put('/employee/apply/edit/:id', function (req, res) {
         return res.jsonp({ "data": [], "fieldErrors": [{ "name": "company", "status": arr['data[' + id + '][company]'] + "未找到" }] });
     }
 });
-
+//驳回申请
 router.delete('/employee/apply/remove/:id', function (req, res) {
     let id = req.params.id;
     let user = AV.Object.createWithoutData('WxUser', id);
@@ -715,12 +717,13 @@ router.delete('/employee/apply/remove/:id', function (req, res) {
         });
     });
 });
-
+//门禁记录
 router.get('/history', function (req, res) {
     let query = new AV.Query('History');
     query.include('user');
     query.include('door');
     query.limit(1000);
+    query.descending('createdAt');
     query.find().then(function (results) {
         async.map(results, function (result, callback) {
             result.set('DT_RowId', result.id);
@@ -738,13 +741,14 @@ router.get('/history', function (req, res) {
         console.log(err);
     });
 });
-
+//访客记录
 router.get('/visitor', function (req, res) {
     let query = new AV.Query('Visit');
     query.include('user');
     query.include('company');
     query.include('interviewee');
     query.limit(1000);
+    query.descending('createdAt');
     query.find().then(function (results) {
         async.map(results, function (result, callback) {
             result.set('DT_RowId', result.id);
@@ -756,6 +760,8 @@ router.get('/visitor', function (req, res) {
             result.set('target', result.get('target'));
             result.set('pass', result.get('pass') == 1 ? "通过" : "未通过");
             result.set('interviewee', result.get('interviewee').get('name'));
+            let time1 = new moment(result.get('createdAt'));
+            result.set('time', time1.format('YYYY-MM-DD HH:mm:ss'));
             callback(null, result);
         }, function (err, data) {
             res.jsonp({ "data": data });
