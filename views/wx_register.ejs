@@ -73,11 +73,11 @@
                     });
             });
             $('#formSubmitBtn').on("click", function () {
-                if($('#company').attr('data-flag')!=1){
+                if($('#company').attr('data-flag')!=1||$('#company').attr('data-name').length==0){
                     weui.alert("请选择公司");
                     return;
                 }
-                if($('#phone').val()==""||$('#name').val()==""){
+                if($('#phone').val()==""||$('#name').val()==""||$('#phone').val().length==0||$('#name').val().length==0){
                     weui.alert("请正确填写");
                     return;
                 }
