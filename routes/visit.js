@@ -31,6 +31,7 @@ router.get('/', function (req, res) {
                             wxuser.set('province', body2.province);
                             wxuser.set('country', body2.country);
                             wxuser.set('headimgurl', body2.headimgurl);
+                            wxuser.set('flag',-1);
                             wxuser.save().then(function (data) {
                                 sess.objidid = data.id;
                                 res.render('visit', { openid: openid });
