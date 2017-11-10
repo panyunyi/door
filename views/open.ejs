@@ -27,7 +27,7 @@
   <script type="text/javascript" src="../weui.js"></script>
   <script src="../socket.io.min.js"></script>
   <script type="text/javascript">
-    var socket = io.connect('http://1p729i9813.51mypc.cn:16375');
+    var socket = io.connect('http://1p729i9813.51mypc.cn:16628');
     socket.emit('clientBroadcast', { room: "eventRoom", event: "<%=ip%>", data: 1 });
     weui.toast('<%=title%>', 3000);
   </script>
