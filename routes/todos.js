@@ -1,40 +1,34 @@
 'use strict';
 var router = require('express').Router();
 var AV = require('leanengine');
+var async = require('async');
 
-var Todo = AV.Object.extend('Todo');
+var Door = AV.Object.extend('Door');
 
-// 查询 Todo 列表
-router.get('/', function(req, res, next) {
-  var query = new AV.Query(Todo);
-  query.descending('createdAt');
-  query.find().then(function(results) {
-    res.render('todos', {
-      title: 'TODO 列表',
-      todos: results
+router.get('/', function (req, res, next) {
+  let start = 24;
+  async.timesSeries(59, function (n, callback) {
+    let door = new Door();
+    door.set('isDel', false);
+    door.set('number', start.toString());
+    door.set('default', 2);
+    door.set('name', start.toString());
+    let strip = "10.10.10." + start.toString();
+    door.set('ip', strip);
+    start++;
+    console.log('%j',door);
+    callback(null, door);
+  }, function (err, doors) {
+    console.log(doors.length);
+    AV.Object.saveAll(doors).then(function (objects) {
+      // 成功
+      res.jsonp(doors.length);
+    }, function (error) {
+      // 异常处理
+      console.log(error);
     });
-  }, function(err) {
-    if (err.code === 101) {
-      // 该错误的信息为：{ code: 101, message: 'Class or object doesn\'t exists.' }，说明 Todo 数据表还未创建，所以返回空的 Todo 列表。
-      // 具体的错误代码详见：https://leancloud.cn/docs/error_code.html
-      res.render('todos', {
-        title: 'TODO 列表',
-        todos: []
-      });
-    } else {
-      next(err);
-    }
-  }).catch(next);
+  });
 });
 
-// 新增 Todo 项目
-router.post('/', function(req, res, next) {
-  var content = req.body.content;
-  var todo = new Todo();
-  todo.set('content', content);
-  todo.save().then(function(todo) {
-    res.redirect('/todos');
-  }).catch(next);
-});
 
 module.exports = router;

@@ -532,6 +532,12 @@ router.get('/employee/apply', function (req, res) {
         query.equalTo('isDel', false);
         query.descending('number');
         query.limit(1000);
+        //判断用户权限给予相应的可分配门禁
+        if (req.currentUser.get('default') == 2) {
+            query.greaterThanOrEqualTo('default', 1);
+        } else if (req.currentUser.get('default') == 1) {
+            query.lessThanOrEqualTo('default', 1);
+        }
         query.find().then(function (results) {
             async.map(results, function (result, callback1) {
                 result.set('label', result.get('name'));
@@ -644,7 +650,7 @@ router.put('/employee/apply/edit/:id', function (req, res) {
                 }
             };
             user.set('flag', 1);
-            user.save().then(function(){
+            user.save().then(function () {
                 if (typeof (doorarr) == "string") {
                     let door = AV.Object.createWithoutData('Door', doorarr);
                     let userdoormap = new UserDoorMap();
@@ -653,7 +659,7 @@ router.put('/employee/apply/edit/:id', function (req, res) {
                     userdoormap.set('day', new Date(2099, 11, 30));
                     userdoormap.set('user', user);
                     userdoormap.set('door', door);
-                    userdoormap.save().then(function(){
+                    userdoormap.save().then(function () {
                         getTokenAndSendMsg(data);
                         res.jsonp({ "data": [] });
                     });
@@ -668,7 +674,7 @@ router.put('/employee/apply/edit/:id', function (req, res) {
                         userdoormap.set('door', door);
                         callback(null, userdoormap);
                     }, function (err, doors) {
-                        AV.Object.saveAll(doors).then(function(){
+                        AV.Object.saveAll(doors).then(function () {
                             getTokenAndSendMsg(data);
                             res.jsonp({ "data": [] });
                         });
