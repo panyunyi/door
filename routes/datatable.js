@@ -505,11 +505,19 @@ router.delete('/employee/remove/:id', function (req, res) {
 //常驻用户申请
 router.get('/employee/apply', function (req, res) {
     let resdata = {};
+    var username = req.currentUser.get('username')
     function promise1(callback) {
         let query = new AV.Query('WxUser');
         query.equalTo('flag', 0);
         query.limit(1000);
         query.include('company');
+        let company = AV.Object.createWithoutData('Company', '59b6102eac502e006af87c2e');
+        if (username == "wy") {
+            query.equalTo('company', company);
+        } else if (username == "huijin") {
+            let company = AV.Object.createWithoutData('Company', '59b6102eac502e006af87c2e');
+            query.notEqualTo('company', company);
+        }
         query.find().then(function (results) {
             async.map(results, function (result, callback1) {
                 result.set('DT_RowId', result.id);
