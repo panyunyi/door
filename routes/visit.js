@@ -152,7 +152,7 @@ router.post('/apply', function (req, res) {
 });
 
 router.get('/success', function (req, res) {
-    res.render('success', { title: "提交成功，等待审核。" })
+    res.render('progress', { title: "提交成功，等待审核。" })
 });
 
 function getTokenAndSendMsg(data) {
