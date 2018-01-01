@@ -40,57 +40,110 @@ router.get('/submit/:number/:id/:openid/:hour', function (req, res) {
     let visit = AV.Object.createWithoutData('Visit', id);
     visit.set('pass', number);
     visit.save();
-    visit.fetch().then(function () {
+    visit.fetch({
+        include:['interviewee']
+        }).then(function () {
         let audittime = new moment(visit.get('updatedAt'));
         if (number == 1) {
-            let query = new AV.Query('UserDoorMap');
-            query.equalTo('isDel', false);
-            query.equalTo('user', visit.get('interviewee'));
-            query.find().then(function (results) {
-                async.map(results, function (result, callback) {
-                    let userdoormap = new UserDoorMap();
-                    userdoormap.set('isDel', false);
-                    userdoormap.set('door', result.get('door'));
-                    userdoormap.set('user', visit.get('user'));
-                    let time = new moment(visit.get('day'));
-                    userdoormap.set('start', visit.get('day'));
-                    userdoormap.set('day', new Date(time.add(hour, 'h').utc().valueOf()));
-                    callback(null, userdoormap);
-                }, function (err, results) {
-                    AV.Object.saveAll(results).then(function () {
-                        let data = {
-                            touser: openid, template_id: "HyIvEtj7tO5bCsuFNH5FyJgFYQy3UkHYdFm0MVpkABM", url: '', "data": {
-                                "first": {
-                                    "value": "您的预约结果如下。",
-                                    "color": "#173177"
-                                },
-                                "keyword1": {
-                                    "value": name,
-                                    "color": "#173177"
-                                },
-                                "keyword2": {
-                                    "value": phone,
-                                    "color": "#173177"
-                                },
-                                "keyword3": {
-                                    "value": audittime.format('LLLL'),
-                                    "color": "#173177"
-                                },
-                                "keyword4": {
-                                    "value": "允许访问",
-                                    "color": "#173177"
-                                },
-                                "remark": {
-                                    "value": "",
-                                    "color": "#173177"
+            if(visit.get('interviewee').get('company').id=='59b6102eac502e006af87c2e'){
+                let query=new AV.Query('Door');
+                query.equalTo('isDel',false);
+                query.equalTo('visit',1);
+                query.find().then(function(results){
+                    async.map(results, function (result, callback) {
+                        let userdoormap = new UserDoorMap();
+                        userdoormap.set('isDel', false);
+                        userdoormap.set('door', result);
+                        userdoormap.set('user', visit.get('user'));
+                        let time = new moment(visit.get('day'));
+                        userdoormap.set('start', visit.get('day'));
+                        userdoormap.set('day', new Date(time.add(hour, 'h').utc().valueOf()));
+                        callback(null, userdoormap);
+                    }, function (err, results) {
+                        AV.Object.saveAll(results).then(function () {
+                            let data = {
+                                touser: openid, template_id: "HyIvEtj7tO5bCsuFNH5FyJgFYQy3UkHYdFm0MVpkABM", url: '', "data": {
+                                    "first": {
+                                        "value": "您的预约结果如下。",
+                                        "color": "#173177"
+                                    },
+                                    "keyword1": {
+                                        "value": name,
+                                        "color": "#173177"
+                                    },
+                                    "keyword2": {
+                                        "value": phone,
+                                        "color": "#173177"
+                                    },
+                                    "keyword3": {
+                                        "value": audittime.format('LLLL'),
+                                        "color": "#173177"
+                                    },
+                                    "keyword4": {
+                                        "value": "允许访问",
+                                        "color": "#173177"
+                                    },
+                                    "remark": {
+                                        "value": "",
+                                        "color": "#173177"
+                                    }
                                 }
-                            }
-                        };
-                        getTokenAndSendMsg(data);
-                        res.send('0');
+                            };
+                            getTokenAndSendMsg(data);
+                            res.send('0');
+                        });
                     });
                 });
-            });
+            }else{
+                let query = new AV.Query('UserDoorMap');
+                query.equalTo('isDel', false);
+                query.equalTo('user', visit.get('interviewee'));
+                query.find().then(function (results) {
+                    async.map(results, function (result, callback) {
+                        let userdoormap = new UserDoorMap();
+                        userdoormap.set('isDel', false);
+                        userdoormap.set('door', result.get('door'));
+                        userdoormap.set('user', visit.get('user'));
+                        let time = new moment(visit.get('day'));
+                        userdoormap.set('start', visit.get('day'));
+                        userdoormap.set('day', new Date(time.add(hour, 'h').utc().valueOf()));
+                        callback(null, userdoormap);
+                    }, function (err, results) {
+                        AV.Object.saveAll(results).then(function () {
+                            let data = {
+                                touser: openid, template_id: "HyIvEtj7tO5bCsuFNH5FyJgFYQy3UkHYdFm0MVpkABM", url: '', "data": {
+                                    "first": {
+                                        "value": "您的预约结果如下。",
+                                        "color": "#173177"
+                                    },
+                                    "keyword1": {
+                                        "value": name,
+                                        "color": "#173177"
+                                    },
+                                    "keyword2": {
+                                        "value": phone,
+                                        "color": "#173177"
+                                    },
+                                    "keyword3": {
+                                        "value": audittime.format('LLLL'),
+                                        "color": "#173177"
+                                    },
+                                    "keyword4": {
+                                        "value": "允许访问",
+                                        "color": "#173177"
+                                    },
+                                    "remark": {
+                                        "value": "",
+                                        "color": "#173177"
+                                    }
+                                }
+                            };
+                            getTokenAndSendMsg(data);
+                            res.send('0');
+                        });
+                    });
+                });
+            }
         } else {
             let data = {
                 touser: openid, template_id: "HyIvEtj7tO5bCsuFNH5FyJgFYQy3UkHYdFm0MVpkABM", url: '', "data": {

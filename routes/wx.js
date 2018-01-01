@@ -91,6 +91,7 @@ router.get('/', function (req, res) {
                                     title = "您已注册";
                                 } else if (data.get('flag') == 0) {
                                     title = "正在审核";
+                                    res.render('progress', { title: "提交成功，等待审核。" });
                                 } else {
                                     return res.render('wx_register', { openid: openid });
                                 }
@@ -158,7 +159,7 @@ router.post('/register', function (req, res) {
 });
 
 router.get('/success', function (req, res) {
-    res.render('progress', { title: "提交成功，等待审核。" })
+    res.render('progress', { title: "提交成功，等待审核。" });
 });
 
 

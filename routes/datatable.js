@@ -381,12 +381,19 @@ router.delete('/userdoormap/remove/:id', function (req, res) {
 //用户信息
 router.get('/employee', function (req, res) {
     let resdata = {};
+    let username = req.currentUser.get('username');
     function promise1(callback) {
         let query = new AV.Query('Employee');
         query.equalTo('isDel', false);
         query.limit(1000);
         query.include('company');
         query.include('user');
+        let company = AV.Object.createWithoutData('Company', '59b6102eac502e006af87c2e');
+        if (username == "wy") {
+            query.equalTo('company', company);
+        } else if (username == "huijin") {
+            query.notEqualTo('company', company);
+        }
         query.find().then(function (results) {
             async.map(results, function (result, callback1) {
                 result.set('DT_RowId', result.id);
@@ -505,7 +512,7 @@ router.delete('/employee/remove/:id', function (req, res) {
 //常驻用户申请
 router.get('/employee/apply', function (req, res) {
     let resdata = {};
-    var username = req.currentUser.get('username')
+    let username = req.currentUser.get('username');
     function promise1(callback) {
         let query = new AV.Query('WxUser');
         query.equalTo('flag', 0);
@@ -515,7 +522,6 @@ router.get('/employee/apply', function (req, res) {
         if (username == "wy") {
             query.equalTo('company', company);
         } else if (username == "huijin") {
-            let company = AV.Object.createWithoutData('Company', '59b6102eac502e006af87c2e');
             query.notEqualTo('company', company);
         }
         query.find().then(function (results) {
@@ -542,7 +548,7 @@ router.get('/employee/apply', function (req, res) {
         query.limit(1000);
         //判断用户权限给予相应的可分配门禁
         if (req.currentUser.get('default') == 2) {
-            query.greaterThanOrEqualTo('default', 1);
+            query.greaterThan('default', 1);
         } else if (req.currentUser.get('default') == 1) {
             query.lessThanOrEqualTo('default', 1);
         }
@@ -587,36 +593,6 @@ router.get('/employee/apply', function (req, res) {
 });
 
 var Employee = AV.Object.extend('Employee');
-// router.put('/employee/apply/edit/:id', function (req, res) {
-//     let arr = req.body;
-//     let id = req.params.id;
-//     let user = AV.Object.createWithoutData('WxUser', id);
-//     let company = AV.Object.createWithoutData('Company', arr['data[' + id + '][companyId]']);
-//     let emp = new Employee();
-//     emp.set('company', company);
-//     emp.set('user', user);
-//     emp.set('isDel', false);
-//     user.set('flag', 1);
-//     user.save();
-//     emp.save();
-//     let cdmQuery=new AV.Query('CompanyDoorMap');
-//     cdmQuery.equalTo('isDel',false);
-//     cdmQuery.equalTo('company',company);
-//     cdmQuery.find().then(function(results){
-//         async.map(results,function(result,callback){
-//             let userdoormap = new UserDoorMap();
-//             userdoormap.set('isDel', false);
-//             userdoormap.set('start', new Date(2011, 1, 1));
-//             userdoormap.set('day', new Date(2099, 11, 30));
-//             userdoormap.set('user', user);
-//             userdoormap.set('door', result.get('door'));
-//             callback(null, userdoormap);
-//         },function(err,doors){
-//             AV.Object.saveAll(doors);
-//             res.jsonp({ "data": [] });
-//         });
-//     });
-// });
 
 //审核申请
 router.put('/employee/apply/edit/:id', function (req, res) {
@@ -625,54 +601,73 @@ router.put('/employee/apply/edit/:id', function (req, res) {
     let doorarr = arr['data[' + id + '][door][]'];
     let user = AV.Object.createWithoutData('WxUser', id);
     let company = AV.Object.createWithoutData('Company', arr['data[' + id + '][companyId]']);
-    if (typeof (company) != "undefined") {
-        let emp = new Employee();
-        emp.set('company', company);
-        emp.set('user', user);
-        emp.set('isDel', false);
-        emp.save();
-        user.fetch().then(function () {
-            let audittime = new moment();
-            let data = {
-                touser: user.get('openid'), template_id: "VD8s8nNPftYihxT6h6Rt4oDVdibu3o7Cml7nwhvDCK4", url: '', "data": {
-                    "first": {
-                        "value": "您好，您的资料已经通过审核并已分配门禁权限。",
-                        "color": "#44b549"
-                    },
-                    "keyword1": {
-                        "value": user.get('name'),
-                        "color": "#222"
-                    },
-                    "keyword2": {
-                        "value": user.get('phone'),
-                        "color": "#222"
-                    },
-                    "keyword3": {
-                        "value": audittime.format('LLLL'),
-                        "color": "#222"
-                    },
-                    "remark": {
-                        "value": "汇金大厦欢迎您的入驻。",
-                        "color": "#222"
-                    }
-                }
-            };
-            user.set('flag', 1);
-            user.save().then(function () {
-                if (typeof (doorarr) == "string") {
-                    let door = AV.Object.createWithoutData('Door', doorarr);
-                    let userdoormap = new UserDoorMap();
-                    userdoormap.set('isDel', false);
-                    userdoormap.set('start', new Date(2011, 1, 1));
-                    userdoormap.set('day', new Date(2099, 11, 30));
-                    userdoormap.set('user', user);
-                    userdoormap.set('door', door);
-                    userdoormap.save().then(function () {
-                        getTokenAndSendMsg(data);
-                        res.jsonp({ "data": [] });
+    let username = req.currentUser.get('username');
+    if (typeof (doorarr) == "undefined") {
+        return res.jsonp({ "data": [], "fieldErrors": [{ "name": "nickname", "status": "请选择门禁权限" }] });
+    }
+    if (typeof (company) == "undefined") {
+        return res.jsonp({ "data": [], "fieldErrors": [{ "name": "company", "status": arr['data[' + id + '][company]'] + "未找到" }] });
+    }
+    async.waterfall([
+        function (callback1) {
+            let temparr = [];
+            if (username == "wy") {
+                let doorQuery = new AV.Query('Door');
+                doorQuery.equalTo('isDel', false);
+                doorQuery.equalTo('default', 1);
+                doorQuery.find().then(function (doors) {
+                    async.map(doors, function (door, callback) {
+                        callback(null, door.id);
+                    }, function (err, doors) {
+                        temparr = doors.concat(doorarr);
+                        callback1(null, temparr);
                     });
+                });
+            } else {
+                if (typeof (doorarr) == "string") {
+                    temparr.push(doorarr);
+                    callback1(null, temparr);
                 } else {
-                    async.map(doorarr, function (one, callback) {
+                    temparr = doorarr;
+                    callback1(null, temparr);
+                }
+            }
+        },
+        function (temparr, callback1) {
+            let emp = new Employee();
+            emp.set('company', company);
+            emp.set('user', user);
+            emp.set('isDel', false);
+            emp.save();
+            user.fetch().then(function () {
+                let audittime = new moment();
+                let data = {
+                    touser: user.get('openid'), template_id: "VD8s8nNPftYihxT6h6Rt4oDVdibu3o7Cml7nwhvDCK4", url: '', "data": {
+                        "first": {
+                            "value": "您好，您的资料已经通过审核并已分配门禁权限。",
+                            "color": "#44b549"
+                        },
+                        "keyword1": {
+                            "value": user.get('name'),
+                            "color": "#222"
+                        },
+                        "keyword2": {
+                            "value": user.get('phone'),
+                            "color": "#222"
+                        },
+                        "keyword3": {
+                            "value": audittime.format('LLLL'),
+                            "color": "#222"
+                        },
+                        "remark": {
+                            "value": "汇金大厦欢迎您的入驻。",
+                            "color": "#222"
+                        }
+                    }
+                };
+                user.set('flag', 1);
+                user.save().then(function () {
+                    async.map(temparr, function (one, callback) {
                         let door = AV.Object.createWithoutData('Door', one);
                         let userdoormap = new UserDoorMap();
                         userdoormap.set('isDel', false);
@@ -684,15 +679,15 @@ router.put('/employee/apply/edit/:id', function (req, res) {
                     }, function (err, doors) {
                         AV.Object.saveAll(doors).then(function () {
                             getTokenAndSendMsg(data);
-                            res.jsonp({ "data": [] });
+                            callback1(null, 1);
                         });
                     });
-                }
+                });
             });
-        });
-    } else {
-        return res.jsonp({ "data": [], "fieldErrors": [{ "name": "company", "status": arr['data[' + id + '][company]'] + "未找到" }] });
-    }
+        }
+    ], function (err, result) {
+        res.jsonp({ "data": [] });
+    });
 });
 //驳回申请
 router.delete('/employee/apply/remove/:id', function (req, res) {
