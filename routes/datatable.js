@@ -271,6 +271,7 @@ router.get('/userdoormap/:id', function (req, res) {
             query.equalTo('isDel', false);
             query.equalTo('user', user);
             query.include('door');
+            query.limit(1000);
             query.find().then(function (results) {
                 async.map(results, function (result, callback1) {
                     result.set('DT_RowId', result.id);
@@ -497,6 +498,7 @@ router.delete('/employee/remove/:id', function (req, res) {
             user.save();
             let query = new AV.Query('UserDoorMap');
             query.equalTo('user', emp.get('user'));
+            query.limit(1000);
             query.find().then(function (results) {
                 async.map(results, function (result, callback) {
                     result.set('isDel', true);
