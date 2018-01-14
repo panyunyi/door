@@ -263,6 +263,7 @@ router.get('/userdoormap/:id', function (req, res) {
     let resdata = {};
     let userarr = [];
     function promise1(callback) {
+        let arr=[];
         let id = req.params.id;
         let user = AV.Object.createWithoutData('WxUser', id);
         user.fetch().then(function () {
@@ -278,6 +279,7 @@ router.get('/userdoormap/:id', function (req, res) {
                     result.set('name', result.get('door').get('name'));
                     result.set('number', result.get('door').get('number'));
                     result.set('ip', result.get('door').get('ip'));
+                    //arr.push({id:result.get('door').id,name:result.get('door').get('name')});
                     result.set('doorid', result.get('door').id);
                     callback1(null, result);
                 }, function (err, results) {
@@ -290,8 +292,14 @@ router.get('/userdoormap/:id', function (req, res) {
     function promise2(callback) {
         let query = new AV.Query('Door');
         query.equalTo('isDel', false);
-        query.ascending('number');
+        query.ascending('name');
         query.limit(1000);
+        //判断用户权限给予相应的可分配门禁
+        if (req.currentUser.get('default') == 2) {
+            query.greaterThan('default', 1);
+        } else if (req.currentUser.get('default') == 1) {
+            query.lessThanOrEqualTo('default', 1);
+        }
         query.find().then(function (results) {
             async.map(results, function (result, callback1) {
                 result.set('label', result.get('name'));
@@ -316,38 +324,77 @@ router.get('/userdoormap/:id', function (req, res) {
 //增加某个门禁权限
 var UserDoorMap = AV.Object.extend('UserDoorMap');
 router.post('/userdoormap/add', function (req, res) {
+    let data=[];
+    let arrmap=[];
     let arr = req.body;
-    let userdoormap = new UserDoorMap();
     let user = AV.Object.createWithoutData('WxUser', arr['data[0][user]']);
-    let door = AV.Object.createWithoutData('Door', arr['data[0][doorid]']);
-    let query = new AV.Query('UserDoorMap');
-    query.equalTo('user', user);
-    query.equalTo('door', door);
-    query.equalTo('isDel', false);
-    query.count().then(function (count) {
-        if (count > 0) {
-            res.jsonp({ "data": [], "fieldErrors": [{ "name": "doorid", "status": "已存在" }] });
-        } else {
-            userdoormap.set('user', user);
-            userdoormap.set('door', door);
-            userdoormap.set('start', new Date(2015, 1, 1));
-            userdoormap.set('day', new Date(2099, 11, 30));
-            userdoormap.set('isDel', false);
-            userdoormap.save().then(function (result) {
-                let data = [];
-                result.set('DT_RowId', result.id);
-                door.fetch().then(function () {
-                    result.set('name', result.get('door').get('name'));
-                    result.set('number', result.get('door').get('number'));
-                    result.set('ip', result.get('door').get('ip'));
-                    data.push(result);
-                    res.jsonp({ "data": data });
+    let inputdoors=arr['data[0][doorid][]'];
+    if(typeof(inputdoors)=='string'){
+        let door = AV.Object.createWithoutData('Door', inputdoors);
+        let userdoormap = new UserDoorMap();
+        let query = new AV.Query('UserDoorMap');
+        query.equalTo('user', user);
+        query.equalTo('door', door);
+        query.equalTo('isDel', false);
+        query.count().then(function (count) {
+            if (count == 0) {
+                userdoormap.set('door', door);
+                userdoormap.save().then(function (result) {
+                    let data = [];
+                    result.set('DT_RowId', result.id);
+                    door.fetch().then(function () {
+                        result.set('name', result.get('door').get('name'));
+                        result.set('number', result.get('door').get('number'));
+                        result.set('ip', result.get('door').get('ip'));
+                        data.push(result);
+                        res.jsonp({ "data": data });
+                    });
+                }, function (error) {
+                    console.log(error);
                 });
-            }, function (error) {
-                console.log(error);
+            } else {
+                res.jsonp({ "data": []});
+            }
+        });
+    }else if(typeof(inputdoors)=='object'){
+        async.map(arr['data[0][doorid][]'],function(doorid,callback){
+            let door = AV.Object.createWithoutData('Door', doorid);
+            let userdoormap = new UserDoorMap();
+            let query = new AV.Query('UserDoorMap');
+            query.equalTo('user', user);
+            query.equalTo('door', door);
+            query.equalTo('isDel', false);
+            query.count().then(function (count) {
+                if (count == 0) {
+                    userdoormap.set('user', user);
+                    userdoormap.set('door', door);
+                    userdoormap.set('start', new Date(2015, 1, 1));
+                    userdoormap.set('day', new Date(2099, 11, 30));
+                    userdoormap.set('isDel', false);
+                    arrmap.push(userdoormap);
+                    callback(null,1);
+                } else {
+                    callback(null,1);
+                }
             });
-        }
-    });
+        },function(err,doors){
+            AV.Object.saveAll(arrmap).then(function(maps){
+                async.map(maps,function(map,callback){
+                    map.fetch({include:['door']}).then(function(mapobj){
+                        let one={DT_RowId:map.id,name:mapobj.get('door').get('name'),number:mapobj.get('door').get('number'),
+                        ip:mapobj.get('door').get('ip')};
+                        callback(null,one);
+                    });
+                },function(err,maps){
+                    res.jsonp({ "data": maps });
+                });
+                
+
+            });
+        });
+    }else if(typeof(inputdoors)=='undefined'){
+        res.jsonp({ "data": [], "fieldErrors": [{ "name": "doorid", "status": "请选择门禁权限" }] });
+    } 
 });
 //修改某个门禁权限
 router.put('/userdoormap/edit/:id', function (req, res) {
