@@ -162,5 +162,7 @@ router.get('/success', function (req, res) {
     res.render('progress', { title: "提交成功，等待审核。" });
 });
 
-
+router.get('/open1', function (req, res) {
+    res.render('open1');
+});
 module.exports = router;
