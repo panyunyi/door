@@ -339,6 +339,10 @@ router.post('/userdoormap/add', function (req, res) {
         query.count().then(function (count) {
             if (count == 0) {
                 userdoormap.set('door', door);
+                userdoormap.set('user', user);
+                userdoormap.set('start', new Date(2015, 1, 1));
+                userdoormap.set('day', new Date(2099, 11, 30));
+                userdoormap.set('isDel', false);
                 userdoormap.save().then(function (result) {
                     let data = [];
                     result.set('DT_RowId', result.id);
