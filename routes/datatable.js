@@ -392,8 +392,6 @@ router.post('/userdoormap/add', function (req, res) {
                 },function(err,maps){
                     res.jsonp({ "data": maps });
                 });
-                
-
             });
         });
     }else if(typeof(inputdoors)=='undefined'){
