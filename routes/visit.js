@@ -88,7 +88,7 @@ router.post('/apply', function (req, res) {
     query.first().then(function (user) {
         if (typeof (user) != "undefined") {
             user.set('name', name);
-            user.set('phone', phone);
+            user.set('visitphone', phone);
             user.save();
             let interviewQuery = new AV.Query('WxUser');
             interviewQuery.equalTo('phone', phone2);

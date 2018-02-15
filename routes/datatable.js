@@ -812,14 +812,14 @@ router.get('/visitor', function (req, res) {
     query.find().then(function (results) {
         async.map(results, function (result, callback) {
             result.set('DT_RowId', result.id);
-            result.set('name', result.get('user').get('name'));
-            result.set('phone', result.get('user').get('phone'));
+            result.set('name', result.get('user')?result.get('user').get('name'):"");
+            result.set('phone', result.get('user')?result.get('user').get('visitphone'):"");
             //result.set('number', result.get('company').get('number'));
             let time = new moment(result.get('day'));
             result.set('day', time.format('LLL'));
             result.set('target', result.get('target'));
             result.set('pass', result.get('pass') == 1 ? "通过" : "未通过");
-            result.set('interviewee', result.get('interviewee').get('name'));
+            result.set('interviewee', result.get('interviewee')?result.get('interviewee').get('name'):"");
             let time1 = new moment(result.get('createdAt'));
             result.set('time', time1.format('YYYY-MM-DD HH:mm:ss'));
             callback(null, result);

@@ -22,7 +22,7 @@ router.get('/', function (req, res) {
                 //query.equalTo('flag', 1);
                 query.count().then(function (count) {
                     if (count == 0) {
-                        res.render('wx_register', { openid: openid });
+                        res.render('menu1', { openid: openid });
                     } else if (count == 1) {
                         query.first().then(function (data) {
                             sess.objid = data.id;
@@ -49,9 +49,9 @@ router.get('/', function (req, res) {
                                     } else if (data.get('flag') == 1) {
                                         res.render('fail', { title: "没有" + door.get('name') + "权限", ip: "", state: 0 });
                                     } else if (data.get('flag') == 0) {
-                                        res.send("正在审核。");
+                                        res.render('progress', { title: "正在审核..." });
                                     } else if (data.get('flag') == -1) {
-                                        res.render('wx_register', { openid: openid });
+                                        res.render('menu1', { openid: openid });
                                     }
                                 });
                             });
@@ -96,9 +96,9 @@ router.get('/', function (req, res) {
                     } else if (data.get('flag') == 1) {
                         res.render('fail', { title: "没有" + door.get('name') + "权限", ip: "", state: 0 });
                     } else if (data.get('flag') == 0) {
-                        res.send("正在审核。");
+                        res.render('progress', { title: "正在审核。" });
                     } else if (data.get('flag') == -1) {
-                        res.render('wx_register', { openid: openid });
+                        res.render('menu1', { openid: openid });
                     }
                 });
             });

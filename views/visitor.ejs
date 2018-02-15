@@ -91,11 +91,11 @@
                 "ajax": '../api/json/visitor',
                 "columns": [
                     { "data": null },
-                    { "data": "name" },
-                    { "data": "phone" },
-                    { "data": "content" },
+                    { "data": "name" , render: function (data) { return data ? data : "" } },
+                    { "data": "phone" , render: function (data) { return data ? data : "" } },
+                    { "data": "content", render: function (data) { return data ? data : "" }  },
                     { "data": "day" },
-                    { "data": "target" },
+                    { "data": "target" , render: function (data) { return data ? data : "" } },
                     { "data": "interviewee" },
                     { "data": "pass" },
                     { "data": "time" }

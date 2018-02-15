@@ -79,7 +79,7 @@ router.get('/', function (req, res) {
                             wxuser.set('flag', -1);
                             wxuser.save().then(function (data) {
                                 sess.objidid = data.id;
-                                res.render('wx_register', { openid: openid });
+                                return res.render('wx_register', { openid: openid });
                             }, function (err) {
                                 console.log(err);
                             });
@@ -91,27 +91,27 @@ router.get('/', function (req, res) {
                                     title = "您已注册";
                                 } else if (data.get('flag') == 0) {
                                     title = "正在审核";
-                                    res.render('progress', { title: "提交成功，等待审核。" });
+                                    return res.render('progress', { title: "提交成功，等待审核。" });
                                 } else {
                                     return res.render('wx_register', { openid: openid });
                                 }
-                                res.render('success', { title: title });
+                                return res.render('success', { title: title });
                             });
                         } else {
                             let log = new Log();
                             log.set('openid', openid);
                             log.set('log', 'openid重复');
                             log.save().then(function () {
-                                res.send("用户信息有重复，请联系管理员。");
+                                return res.send("用户信息有重复，请联系管理员。");
                             });
                         }
                     });
                 } else {
-                    res.send("已超时，请退出菜单重进。");
+                    return res.send("已超时，请退出菜单重进。");
                 }
             });
         } else {
-            res.send("已超时，请退出菜单重进。");
+            return res.send("已超时，请退出菜单重进。");
         }
     });
     // } else {

@@ -41,15 +41,15 @@ router.get('/submit/:number/:id/:openid/:hour', function (req, res) {
     visit.set('pass', number);
     visit.save();
     visit.fetch({
-        include:['interviewee']
-        }).then(function () {
+        include: ['interviewee']
+    }).then(function () {
         let audittime = new moment(visit.get('updatedAt'));
         if (number == 1) {
-            if(visit.get('interviewee').get('company').id=='59b6102eac502e006af87c2e'){
-                let query=new AV.Query('Door');
-                query.equalTo('isDel',false);
-                query.equalTo('visit',1);
-                query.find().then(function(results){
+            if (visit.get('interviewee').get('company').id == '59b6102eac502e006af87c2e') {
+                let query = new AV.Query('Door');
+                query.equalTo('isDel', false);
+                query.equalTo('visit', 1);
+                query.find().then(function (results) {
                     async.map(results, function (result, callback) {
                         let userdoormap = new UserDoorMap();
                         userdoormap.set('isDel', false);
@@ -58,6 +58,7 @@ router.get('/submit/:number/:id/:openid/:hour', function (req, res) {
                         let time = new moment(visit.get('day'));
                         userdoormap.set('start', visit.get('day'));
                         userdoormap.set('day', new Date(time.add(hour, 'h').utc().valueOf()));
+                        userdoormap.set('temporary', true);
                         callback(null, userdoormap);
                     }, function (err, results) {
                         AV.Object.saveAll(results).then(function () {
@@ -94,7 +95,7 @@ router.get('/submit/:number/:id/:openid/:hour', function (req, res) {
                         });
                     });
                 });
-            }else{
+            } else {
                 let query = new AV.Query('UserDoorMap');
                 query.equalTo('isDel', false);
                 query.equalTo('user', visit.get('interviewee'));
@@ -107,6 +108,7 @@ router.get('/submit/:number/:id/:openid/:hour', function (req, res) {
                         let time = new moment(visit.get('day'));
                         userdoormap.set('start', visit.get('day'));
                         userdoormap.set('day', new Date(time.add(hour, 'h').utc().valueOf()));
+                        userdoormap.set('temporary', true);
                         callback(null, userdoormap);
                     }, function (err, results) {
                         AV.Object.saveAll(results).then(function () {
