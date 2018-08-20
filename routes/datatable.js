@@ -321,7 +321,7 @@ router.get('/userdoormap/:id', function (req, res) {
             res.jsonp(resdata);
         });
 });
-//增加某个门禁权限
+//增加门禁权限
 var UserDoorMap = AV.Object.extend('UserDoorMap');
 router.post('/userdoormap/add', function (req, res) {
     let data=[];
@@ -435,7 +435,7 @@ router.get('/employee', function (req, res) {
     function promise1(callback) {
         let query = new AV.Query('Employee');
         query.equalTo('isDel', false);
-        query.limit(1000);
+        //query.limit(1000);
         query.include('company');
         query.include('user');
         let company = AV.Object.createWithoutData('Company', '59b6102eac502e006af87c2e');
@@ -444,21 +444,33 @@ router.get('/employee', function (req, res) {
         } else if (username == "huijin") {
             query.notEqualTo('company', company);
         }
-        query.find().then(function (results) {
-            async.map(results, function (result, callback1) {
-                result.set('DT_RowId', result.id);
-                result.set('name', result.get('user').get('name'));
-                result.set('phone', result.get('user').get('phone'));
-                result.set('userId', result.get('user').id);
-                //result.set('nickname', result.get('user').get('nickname'));
-                result.set('floor', result.get('company').get('floor'));
-                result.set('number', result.get('company').get('number'));
-                result.set('companyName', result.get('company').get('name'));
-                result.set('company', result.get('company').id);
-                callback1(null, result);
-            }, function (err, data) {
-                resdata["data"] = data;
-                callback(null, data);
+        query.count().then(function (count) {
+            let num = Math.ceil(count / 1000);
+            let emps = [];
+            async.times(num, function (n, callback2) {
+                query.descending('createdAt');
+                query.limit(1000);
+                query.skip(1000 * n);
+                query.find().then(function (results) {
+                    emps = emps.concat(results);
+                    callback2(null, results);
+                });
+            }, function (err, empsres) {
+                async.map(emps, function (result, callback1) {
+                    result.set('DT_RowId', result.id);
+                    result.set('name', result.get('user').get('name'));
+                    result.set('phone', result.get('user').get('phone'));
+                    result.set('userId', result.get('user').id);
+                    //result.set('nickname', result.get('user').get('nickname'));
+                    result.set('floor', result.get('company').get('floor'));
+                    result.set('number', result.get('company').get('number'));
+                    result.set('companyName', result.get('company').get('name'));
+                    result.set('company', result.get('company').id);
+                    callback1(null, result);
+                },function (err, data) {
+                    resdata["data"] = data;
+                    callback(null, data);
+                });
             });
         });
     }
