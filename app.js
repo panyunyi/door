@@ -52,11 +52,13 @@ app.get('/logout',function(req,res){
     return res.redirect('login');
 });
 app.use('/wx',require('./routes/wx'));
+app.use('/ndwx',require('./routes/ndwx'));
 app.use('/open', require('./routes/open'));
 app.use('/login', users);
 app.use('/admin',admin);
 app.use('/todos',todos);
 app.use('/visit',visit);
+app.use('/ndvisit',require('./routes/ndvisit'));
 app.use('/audit',audit);
 app.use('/menu',menu);
 app.use('/api/json',datatable);
