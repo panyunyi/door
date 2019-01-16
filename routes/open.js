@@ -13,6 +13,7 @@ router.get('/', function (req, res) {
     if (typeof (sess.objid) == "undefined") {
         let code = req.query.code;
         let state = req.query.state;
+        let nd=(state.substr(0,2)=="nd")?"http://1p729i9813.51mypc.cn:44566":"http://223.112.77.226:5000";
         let client = request.createClient('https://api.weixin.qq.com/sns/oauth2/');
         client.get('access_token?appid=' + appid + '&secret=' + secret + '&code=' + code + '&grant_type=authorization_code', function (err, res1, body) {
             if (body != "undefined" && typeof (body.openid) != "undefined") {
@@ -45,7 +46,7 @@ router.get('/', function (req, res) {
                                         history.set('user', data);
                                         history.set('door', door);
                                         history.save();
-                                        res.render('open', { title: door.get('name') + "已开", ip: door.get('ip'), state: 1 });
+                                        res.render('open', { title: door.get('name') + "已开", ip: door.get('ip'), state: 1 ,nd:nd});
                                     } else if (data.get('flag') == 1) {
                                         res.render('fail', { title: "没有" + door.get('name') + "权限", ip: "", state: 0 });
                                     } else if (data.get('flag') == 0) {
