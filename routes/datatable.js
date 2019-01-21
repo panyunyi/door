@@ -295,10 +295,16 @@ router.get('/userdoormap/:id', function (req, res) {
         query.ascending('name');
         query.limit(1000);
         //判断用户权限给予相应的可分配门禁
-        if (req.currentUser.get('default') == 2) {
-            query.greaterThan('default', 1);
-        } else if (req.currentUser.get('default') == 1) {
+        if (req.currentUser.get('default') == 2) {//wy
+            let query1=new AV.Query('Door');
+            let query2=new AV.Query('Door');
+            query1.greaterThan('default',1);
+            query2.notEqualTo('default',3);
+            query=AV.Query.or(query1, query2);
+        } else if (req.currentUser.get('default') == 1) {//huijin
             query.lessThanOrEqualTo('default', 1);
+        }else if(req.currentUser.get('default') == 3){//nuoding
+            query.equalTo('default',3);
         }
         query.find().then(function (results) {
             async.map(results, function (result, callback1) {
@@ -437,12 +443,16 @@ router.get('/employee', function (req, res) {
         query.equalTo('isDel', false);
         //query.limit(1000);
         query.include('company');
+        query.include('ndcompany');
         query.include('user');
         let company = AV.Object.createWithoutData('Company', '59b6102eac502e006af87c2e');
+        let nuoding=AV.Object.createWithoutData('Company', '5c45e36f9f545400709914e4');
         if (username == "wy") {
             query.equalTo('company', company);
         } else if (username == "huijin") {
             query.notEqualTo('company', company);
+        }else if(username=="nuoding"){
+            query.equalTo('ndcompany',nuoding);
         }
         query.count().then(function (count) {
             let num = Math.ceil(count / 1000);
@@ -462,10 +472,18 @@ router.get('/employee', function (req, res) {
                     result.set('phone', result.get('user').get('phone'));
                     result.set('userId', result.get('user').id);
                     //result.set('nickname', result.get('user').get('nickname'));
-                    result.set('floor', result.get('company').get('floor'));
-                    result.set('number', result.get('company').get('number'));
-                    result.set('companyName', result.get('company').get('name'));
-                    result.set('company', result.get('company').id);
+                    
+                    if(username=="nuoding"){
+                        result.set('companyName', result.get('ndcompany').get('name'));
+                        result.set('company', result.get('ndcompany').id);
+                        result.set('floor', result.get('ndcompany').get('floor'));
+                        result.set('number', result.get('ndcompany').get('number'));
+                    }else{
+                        result.set('companyName', result.get('company').get('name'));
+                        result.set('company', result.get('company').id);
+                        result.set('floor', result.get('company').get('floor'));
+                        result.set('number', result.get('company').get('number'));
+                    }
                     callback1(null, result);
                 },function (err, data) {
                     resdata["data"] = data;
@@ -551,11 +569,16 @@ router.put('/employee/edit/:id', function (req, res) {
 router.delete('/employee/remove/:id', function (req, res) {
     let id = req.params.id;
     let emp = AV.Object.createWithoutData('Employee', id);
+    let username = req.currentUser.get('username');
     emp.set('isDel', true);
     emp.save().then(function () {
         emp.fetch().then(function () {
             let user = emp.get('user')
-            user.set('flag', -1);
+            if(username=="nuoding"){
+                user.set('ndflag',-1);
+            }else{
+                user.set('flag', -1);
+            }
             user.save();
             let query = new AV.Query('UserDoorMap');
             query.equalTo('user', emp.get('user'));
@@ -578,21 +601,32 @@ router.get('/employee/apply', function (req, res) {
     let username = req.currentUser.get('username');
     function promise1(callback) {
         let query = new AV.Query('WxUser');
-        query.equalTo('flag', 0);
         query.limit(1000);
         query.include('company');
+        query.include('ndcompany');
         let company = AV.Object.createWithoutData('Company', '59b6102eac502e006af87c2e');
+        let nuoding=AV.Object.createWithoutData('Company', '5c45e36f9f545400709914e4');
         if (username == "wy") {
             query.equalTo('company', company);
+            query.equalTo('flag', 0);
         } else if (username == "huijin") {
             query.notEqualTo('company', company);
+            query.equalTo('flag', 0);
+        }else if(username=="nuoding"){
+            query.equalTo('ndcompany',nuoding);
+            query.equalTo('ndflag', 0);
         }
         query.find().then(function (results) {
             async.map(results, function (result, callback1) {
                 result.set('DT_RowId', result.id);
                 result.set('floor', result.get('company') ? result.get('company').get('floor') : "");
-                result.set('companyId', result.get('company') ? result.get('company').id : "");
-                result.set('company', result.get('company') ? result.get('company').get('name') : "");
+                if(username=="nuoding"){
+                    result.set('companyId', result.get('ndcompany') ? result.get('ndcompany').id : "");
+                    result.set('company', result.get('ndcompany') ? result.get('ndcompany').get('name') : "");
+                }else{
+                    result.set('companyId', result.get('company') ? result.get('company').id : "");
+                    result.set('company', result.get('company') ? result.get('company').get('name') : "");
+                }
                 let time = new moment(result.get('updatedAt'));
                 result.set('time', time.format('YYYY-MM-DD HH:mm:ss'));
                 callback1(null, result);
@@ -610,10 +644,16 @@ router.get('/employee/apply', function (req, res) {
         query.descending('number');
         query.limit(1000);
         //判断用户权限给予相应的可分配门禁
-        if (req.currentUser.get('default') == 2) {
-            query.greaterThan('default', 1);
-        } else if (req.currentUser.get('default') == 1) {
+        if (req.currentUser.get('default') == 2) {//wy
+            let query1=new AV.Query('Door');
+            let query2=new AV.Query('Door');
+            query1.greaterThan('default',1);
+            query2.notEqualTo('default',3);
+            query=AV.Query.or(query1, query2);
+        } else if (req.currentUser.get('default') == 1) {//huijin
             query.lessThanOrEqualTo('default', 1);
+        }else if(req.currentUser.get('default') == 3){//nuoding
+            query.equalTo('default',3);
         }
         query.find().then(function (results) {
             async.map(results, function (result, callback1) {
@@ -659,6 +699,7 @@ var Employee = AV.Object.extend('Employee');
 
 //审核申请
 router.put('/employee/apply/edit/:id', function (req, res) {
+    let title="汇金大厦欢迎您的入驻。";
     let arr = req.body;
     let id = req.params.id;
     let doorarr = arr['data[' + id + '][door][]'];
@@ -686,6 +727,19 @@ router.put('/employee/apply/edit/:id', function (req, res) {
                         callback1(null, temparr);
                     });
                 });
+            }else if (username == "nuoding") {
+                title="诺丁公馆欢迎您回家。";
+                let doorQuery = new AV.Query('Door');
+                doorQuery.equalTo('isDel', false);
+                doorQuery.equalTo('default', 3);
+                doorQuery.find().then(function (doors) {
+                    async.map(doors, function (door, callback) {
+                        callback(null, door.id);
+                    }, function (err, doors) {
+                        temparr = doorarr;
+                        callback1(null, temparr);
+                    });
+                });
             } else {
                 if (typeof (doorarr) == "string") {
                     temparr.push(doorarr);
@@ -698,7 +752,11 @@ router.put('/employee/apply/edit/:id', function (req, res) {
         },
         function (temparr, callback1) {
             let emp = new Employee();
-            emp.set('company', company);
+            if (username == "nuoding") {
+                emp.set('ndcompany', company);
+            }else{
+                emp.set('company', company);
+            }
             emp.set('user', user);
             emp.set('isDel', false);
             emp.save();
@@ -723,12 +781,16 @@ router.put('/employee/apply/edit/:id', function (req, res) {
                             "color": "#222"
                         },
                         "remark": {
-                            "value": "汇金大厦欢迎您的入驻。",
+                            "value": title,
                             "color": "#222"
                         }
                     }
                 };
-                user.set('flag', 1);
+                if(username=="nuoding"){
+                    user.set('ndflag',1);
+                }else{
+                    user.set('flag', 1);
+                }
                 user.save().then(function () {
                     async.map(temparr, function (one, callback) {
                         let door = AV.Object.createWithoutData('Door', one);
@@ -756,6 +818,7 @@ router.put('/employee/apply/edit/:id', function (req, res) {
 router.delete('/employee/apply/remove/:id', function (req, res) {
     let id = req.params.id;
     let user = AV.Object.createWithoutData('WxUser', id);
+    let username = req.currentUser.get('username');
     user.fetch().then(function () {
         let audittime = new moment();
         let data = {
@@ -783,7 +846,11 @@ router.delete('/employee/apply/remove/:id', function (req, res) {
             }
         };
         getTokenAndSendMsg(data);
-        user.set('flag', -1);
+        if(username=="nuoding"){
+            user.set('ndflag',-1);
+        }else{
+            user.set('flag', -1);
+        }
         user.save().then(function () {
             res.jsonp({ "data": [] });
         });
@@ -821,6 +888,10 @@ router.get('/visitor', function (req, res) {
     query.include('interviewee');
     query.limit(1000);
     query.descending('createdAt');
+    /*let nuoding=AV.Object.createWithoutData('Company', '5c45e36f9f545400709914e4');
+    if(username=="nuoding"){
+        query.equalTo('company',nuoding);
+    }*/
     query.find().then(function (results) {
         async.map(results, function (result, callback) {
             result.set('DT_RowId', result.id);

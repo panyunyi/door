@@ -31,7 +31,7 @@ router.get('/', function (req, res) {
                             wxuser.set('province', body2.province);
                             wxuser.set('country', body2.country);
                             wxuser.set('headimgurl', body2.headimgurl);
-                            wxuser.set('flag',-1);
+                            wxuser.set('ndflag',-1);
                             wxuser.save().then(function (data) {
                                 sess.objidid = data.id;
                                 res.render('visit', { openid: openid });
@@ -46,7 +46,7 @@ router.get('/', function (req, res) {
                         } else {
                             let log = new Log();
                             log.set('openid', openid);
-                            log.set('log', 'openid重复');
+                            log.set('log', 'nd-openid重复');
                             log.save().then(function () {
                                 res.send("用户信息有重复，请联系管理员。");
                             });

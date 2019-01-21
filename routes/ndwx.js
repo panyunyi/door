@@ -10,7 +10,7 @@ var async = require('async');
 function combine(companies, floorArr) {
     let arr = [];
     async.map(floorArr, function (floor, callback1) {
-        let onefloor = { label: floor + "F", value: floor };
+        let onefloor = { label: floor + "", value: floor };
         let comArr = [];
         async.map(companies, function (company, callback2) {
             let onecompany = { label: company.name, value: company.id };
@@ -33,6 +33,7 @@ router.get('/company', function (req, res) {
     let floorArr = [];
     companyQuery.equalTo('isDel', false);
     companyQuery.ascending('floor');
+    companyQuery.equalTo('floor',333);
     companyQuery.find().then(function (companies) {
         async.map(companies, function (company, callback) {
             let floor = company.get('floor');
@@ -76,10 +77,10 @@ router.get('/', function (req, res) {
                             wxuser.set('province', body2.province);
                             wxuser.set('country', body2.country);
                             wxuser.set('headimgurl', body2.headimgurl);
-                            wxuser.set('flag', -1);
+                            wxuser.set('ndflag', -1);
                             wxuser.save().then(function (data) {
                                 sess.objidid = data.id;
-                                return res.render('wx_register', { openid: openid });
+                                return res.render('ndwx_register', { openid: openid });
                             }, function (err) {
                                 console.log(err);
                             });
@@ -87,20 +88,20 @@ router.get('/', function (req, res) {
                             query.first().then(function (data) {
                                 sess.objid = data.id;
                                 let title = "";
-                                if (data.get('flag') == 1) {
+                                if (data.get('ndflag') == 1) {
                                     title = "您已注册";
-                                } else if (data.get('flag') == 0) {
+                                } else if (data.get('ndflag') == 0) {
                                     title = "正在审核";
                                     return res.render('progress', { title: "提交成功，等待审核。" });
                                 } else {
-                                    return res.render('wx_register', { openid: openid });
+                                    return res.render('ndwx_register', { openid: openid });
                                 }
                                 return res.render('success', { title: title ,id:data.id});
                             });
                         } else {
                             let log = new Log();
                             log.set('openid', openid);
-                            log.set('log', 'openid重复');
+                            log.set('log', 'nd-openid重复');
                             log.save().then(function () {
                                 return res.send("用户信息有重复，请联系管理员。");
                             });
@@ -139,17 +140,17 @@ router.post('/register', function (req, res) {
         if (typeof (data) == "undefined") {
             let user = new WxUser();
             user.set('name', req.body.name);
-            user.set('flag', 0);
+            user.set('ndflag', 0);
             user.set('phone', req.body.phone);
-            user.set('company', company);
+            user.set('ndcompany', company);
             user.set('openid', openid);
             user.save().then(function () {
                 res.send({ error: 0, msg: "" });
             });
         } else {
-            data.set('company', company);
+            data.set('ndcompany', company);
             data.set('name', req.body.name);
-            data.set('flag', 0);
+            data.set('ndflag', 0);
             data.set('phone', req.body.phone);
             data.save().then(function () {
                 res.send({ error: 0, msg: "" });
