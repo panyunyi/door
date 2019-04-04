@@ -13,7 +13,11 @@ router.get('/', function (req, res) {
     if (typeof (sess.objid) == "undefined") {
         let code = req.query.code;
         let state = req.query.state;
-        let nd=(state.substr(0,2)=="nd")?"http://14961rg045.iask.in:23910":"http://223.112.77.226:5000";
+        //let nd=(state.substr(0,2)=="nd")?"http://1p729i9813.51mypc.cn:44566":"http://223.112.77.226:5000";
+        let nd="http://223.112.77.226:5000";
+        if(state.substr(0,2)=="nd"){
+            res.redirect("http://doorwap.1percentsoft.cn/open.html?scope=snsapi_userinfo&code="+code+"&state="+state);
+        }
         let client = request.createClient('https://api.weixin.qq.com/sns/oauth2/');
         client.get('access_token?appid=' + appid + '&secret=' + secret + '&code=' + code + '&grant_type=authorization_code', function (err, res1, body) {
             if (body != "undefined" && typeof (body.openid) != "undefined") {
@@ -33,6 +37,12 @@ router.get('/', function (req, res) {
                             doorQuery.first().then(function (door) {
                                 if (typeof (door) == "undefined") {
                                     return res.render('fail', { title: "未找到编号为" + state + "的门", ip: "" });
+                                }
+                                if(door.get('test')==1){
+                                    let client = request.createClient('http://39.98.90.27:8705/service-resident/wechat/');
+                                    client.post('remoteOpen?doorId=57', data, function (err, res, body) {
+                                        console.log(body);
+                                    });
                                 }
                                 let mapQuery = new AV.Query('UserDoorMap');
                                 mapQuery.equalTo('door', door);
