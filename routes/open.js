@@ -40,10 +40,11 @@ router.get('/', function (req, res) {
                                 }
                                 if(door.get('test')==1){
                                     let client = request.createClient('http://39.98.90.27:8705/service-resident/wechat/');
-                                    client.post('remoteOpen?doorId=57', data, function (err, res, body) {
+                                    client.post('remoteOpen?doorId=57', data, function (err, ress, body) {
                                         console.log(body);
-                                        res.render('open1');
+                                         res.render('open1');
                                     });
+                                    return;
                                 }
                                 let mapQuery = new AV.Query('UserDoorMap');
                                 mapQuery.equalTo('door', door);
